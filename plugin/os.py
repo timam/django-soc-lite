@@ -19,7 +19,8 @@ def system(command):
         _logger.info(
             "injection attempt",
             stacktrace=traceback.format_stack(),
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
+            data=command
         )
 
     return _system(quote(command))
