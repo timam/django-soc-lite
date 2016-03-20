@@ -5,6 +5,8 @@ import click
 import requests
 
 
+app_directory = os.path.join(os.path.expanduser("~"), ".plugin")
+
 @click.command()
 @click.argument("server")
 def cli(server):
@@ -12,9 +14,9 @@ def cli(server):
     client_id = r.text
 
     try:
-        os.makedirs("~/.plugin")
+        os.makedirs(app_directory)
     except OSError:
         pass
 
-    with open("~/.plugin/client_id", "w+") as f:
+    with open(os.path.join(app_directory, "client_id"), "w+") as f:
         f.write(client_id)
