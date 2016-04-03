@@ -1,4 +1,8 @@
+from datetime import datetime
+
 import os
+
+import subprocess
 
 import click
 
@@ -20,3 +24,11 @@ def cli(server):
 
     with open(os.path.join(settings_directory, "client_id"), "w+") as f:
         f.write(client_id)
+
+
+    versions = subprocess.check_output(["pip", "freeze"])
+    requests.post("http://localhost:4040/version/python", data={
+        "client_id": client_id,
+        "timestamp": datetime.utcnow(),
+        "data": versions
+    })
