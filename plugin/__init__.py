@@ -2,7 +2,7 @@ import os
 
 
 settings_directory = os.path.join(
-    os.path.expanduser("~"), ".python_thread_plugin"
+    os.path.expanduser("~"), ".python_threat_plugin"
 )
 
 
