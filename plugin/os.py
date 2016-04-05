@@ -9,7 +9,7 @@ import requests
 
 from shellescape import quote
 
-from plugin import client_id
+from plugin import client_id, server, port
 
 
 __implements__ = ["system"]
@@ -20,7 +20,7 @@ _system = os.system
 
 def system(command):
     if _find_potential_attacks(command) is not None:
-        requests.post("http://localhost:4040/log/new", data={
+        requests.post("http://{0}:{1}/log/new".format(server, port), data={
             "client_id": client_id,
             "timestamp": datetime.utcnow(),
             "data": json.dumps({
