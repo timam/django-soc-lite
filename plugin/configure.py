@@ -13,8 +13,11 @@ from plugin import settings_directory
 
 @click.command()
 @click.argument("server")
-def cli(server):
-    r = requests.get("http://{0}:4040/client/register/python".format(server))
+@click.argument("port")
+def cli(server, port):
+    r = requests.get("http://{0}:{1}/client/register/python".format(
+        server, port
+    ))
     client_id = r.text
 
     try:
@@ -25,9 +28,11 @@ def cli(server):
     with open(os.path.join(settings_directory, "client_id"), "w+") as f:
         f.write(client_id)
 
+    with open(os.path.join(settings_directory, "server"), "w+") as f:
+        f.write("{0}:{1}".format(server, port)
 
     versions = subprocess.check_output(["pip", "freeze"])
-    requests.post("http://localhost:4040/version/python", data={
+    requests.post("http://{0}:{1}/version/python".format(server, port), data={
         "client_id": client_id,
         "timestamp": datetime.utcnow(),
         "data": versions
