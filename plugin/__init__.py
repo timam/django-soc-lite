@@ -6,14 +6,12 @@ settings_directory = os.path.join(
 )
 
 
-class PluginNotConfiguredError(Exception):
-    pass
-
-
 try:
     with open(os.path.join(settings_directory, "client_id")) as f:
         client_id = f.read()
     with open(os.path.join(settings_directory, "server")) as f:
         server, port = f.read().split(":")
 except FileNotFoundError:
-    raise PluginNotConfiguredError("Please configure the plugin")
+    client_id = None
+    server = None
+    port = None
