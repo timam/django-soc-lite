@@ -9,7 +9,7 @@ import requests
 
 from shellescape import quote
 
-from plugin import client_id, server, port
+from plugin import client_id, port, server
 
 
 __implements__ = ["system"]

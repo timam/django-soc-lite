@@ -1,8 +1,8 @@
-from datetime import datetime
-
 import os
 
 import subprocess
+
+from datetime import datetime
 
 import click
 
@@ -29,7 +29,7 @@ def cli(server, port):
         f.write(client_id)
 
     with open(os.path.join(settings_directory, "server"), "w+") as f:
-        f.write("{0}:{1}".format(server, port)
+        f.write("{0}:{1}".format(server, port))
 
     versions = subprocess.check_output(["pip", "freeze"])
     requests.post("http://{0}:{1}/version/python".format(server, port), data={
