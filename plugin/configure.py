@@ -37,3 +37,6 @@ def cli(server, port):
         "timestamp": datetime.utcnow(),
         "data": versions
     })
+
+    with open(os.path.join(settings_directory, "last_updated"), "w+") as f:
+        f.write(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))

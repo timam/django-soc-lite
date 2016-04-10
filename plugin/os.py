@@ -10,6 +10,7 @@ import requests
 from shellescape import quote
 
 from plugin import client_id, port, server
+from plugin.info import send_client_info
 
 
 __implements__ = ["system"]
@@ -29,5 +30,7 @@ def system(command):
                 "data": command,
             })
         })
+
+    send_client_info()
 
     return _system(quote(command))
