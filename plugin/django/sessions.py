@@ -27,4 +27,6 @@ class ThreatSessionMiddleware(object):
                     })
                 })
 
+                request.session.flush()
+
         send_client_info()
