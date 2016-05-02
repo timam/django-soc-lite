@@ -24,6 +24,7 @@ class ThreatSessionMiddleware(object):
                     "timestamp": datetime.utcnow(),
                     "data": json.dumps({
                         "event": "session attempt",
+                        "session_info": request.COOKIES
                     })
                 })
 
