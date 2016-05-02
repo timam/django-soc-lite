@@ -19,13 +19,23 @@ class ThreatSessionMiddleware(object):
         else:
             if fingerprint != request.META["HTTP_USER_AGENT"]:
                 url = "http://{0}:{1}/log/new".format(server, port)
+
+                wanted_headers = [
+                    "HTTP_USER_AGENT", "REMOTE_ADDR", "REMOTE_HOST"
+                ]
+
+                headers = dict(
+                    (k, request.META[k]) for k in wanted_headers
+                    if k in request.META
+                )
+
                 requests.post(url, data={
                     "client_id": client_id,
                     "timestamp": datetime.utcnow(),
                     "data": json.dumps({
                         "event": "session attempt",
                         "session_info": request.COOKIES,
-                        "headers": request.META,
+                        "headers": headers,
                     })
                 })
 
