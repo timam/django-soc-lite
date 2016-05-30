@@ -14,11 +14,14 @@ from plugin import settings_directory
 @click.command()
 @click.argument("server")
 @click.argument("port")
-def cli(server, port):
-    r = requests.get("http://{0}:{1}/client/register/python".format(
-        server, port
-    ))
-    client_id = r.text
+@click.argument("client_id"
+def cli(server, port, client_id):
+    versions = subprocess.check_output(["pip", "freeze"])
+    requests.post("http://{0}:{1}/version/python".format(server, port), data={
+        "client_id": client_id,
+        "timestamp": datetime.utcnow(),
+        "data": versions
+    })
 
     try:
         os.makedirs(settings_directory)
@@ -31,12 +34,6 @@ def cli(server, port):
     with open(os.path.join(settings_directory, "server"), "w+") as f:
         f.write("{0}:{1}".format(server, port))
 
-    versions = subprocess.check_output(["pip", "freeze"])
-    requests.post("http://{0}:{1}/version/python".format(server, port), data={
-        "client_id": client_id,
-        "timestamp": datetime.utcnow(),
-        "data": versions
-    })
 
     with open(os.path.join(settings_directory, "last_updated"), "w+") as f:
         f.write(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
