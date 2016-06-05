@@ -48,8 +48,20 @@ def cli(server, port, client_id, source_dir):
                 with open(filepath, "r") as f:
                     data = f.read()
 
-                with open(filepath, "w") as f:
-                    f.write(
-                        "from plugin import monkey; monkey.patch_all()\n\n" +
-                        data
+                data = data.split("\n")
+                for pos, i in enumerate(data):
+                    if i.startswith("from __future__"):
+                        data.insert(
+                            pos+1,
+                            "from plugin import monkey; monkey.patch_all()\n"
+                        )
+                        break
+                else:
+                    data.insert(
+                        0, "from plugin import monkey; monkey.patch_all()\n"
                     )
+
+                data = "\n".join(data)
+
+                with open(filepath, "w") as f:
+                    f.write(data)
