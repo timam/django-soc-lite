@@ -14,7 +14,13 @@ class ServerUnreachableError(Exception):
 
 
 def get_client_versions():
-    versions = subprocess.check_output(["pip", "freeze"])
+    try:
+        versions = subprocess.check_output(["pip", "freeze"])
+    except subprocess.CalledProcessError:
+        # Preempt any subprocess error. TODO: Figure out how to make this
+        # more robust against errors.
+        return None
+
     r = requests.post("http://{0}:{1}/version/python".format(
         server, port
     ), data={
