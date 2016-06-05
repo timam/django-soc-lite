@@ -15,7 +15,8 @@ from plugin import settings_directory
 @click.argument("server")
 @click.argument("port")
 @click.argument("client_id")
-def cli(server, port, client_id):
+@click.argument("source_dir", type=click.Path(exists=True))
+def cli(server, port, client_id, source_dir):
     versions = subprocess.check_output(["pip", "freeze"])
     requests.post("http://{0}:{1}/version/python".format(server, port), data={
         "client_id": client_id,
@@ -37,3 +38,16 @@ def cli(server, port, client_id):
 
     with open(os.path.join(settings_directory, "last_updated"), "w+") as f:
         f.write(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
+
+    for root, dirs, files in os.walk(source_dir):
+        for f in files:
+            filepath = root + os.sep + f
+            if filepath.endswith(".py"):
+                with open(filepath, "r") as f:
+                    data = f.read()
+
+                with open(filepath, "w") as f:
+                    f.write(
+                        "from plugin import monkey; monkey.patch_all()\n\n" +
+                        data
+                    )
