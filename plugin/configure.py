@@ -14,7 +14,7 @@ from plugin import settings_directory
 @click.command()
 @click.argument("server")
 @click.argument("port")
-@click.argument("client_id"
+@click.argument("client_id")
 def cli(server, port, client_id):
     versions = subprocess.check_output(["pip", "freeze"])
     requests.post("http://{0}:{1}/version/python".format(server, port), data={
