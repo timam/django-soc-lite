@@ -41,7 +41,7 @@ def cli(server, port, client_id, source_dir):
 
     for root, dirs, files in os.walk(source_dir):
         for f in files:
-            filepath = root + os.sep + f
+            filepath = os.path.join(root, f)
             if filepath.endswith(".py"):
                 with open(filepath, "r") as f:
                     data = f.read()
