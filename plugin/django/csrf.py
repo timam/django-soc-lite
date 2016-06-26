@@ -1,8 +1,9 @@
 from __future__ import absolute_import, division, print_function
-
-import json
-
+from django.conf import settings
+from django.http import HttpResponseForbidden
+import md5
 import re
+import itertools
 
 from datetime import datetime
 
@@ -14,9 +15,13 @@ from plugin.info import send_client_info
 
 
 
-class ThreatXSSMiddleware(object):
+class ThreatCsrfMiddleware(object):
     def __init__(self, request):
         self.request = request
+        
+post_form = \re.compile(r'(<form\W[^>]*\bmethod=(\'|"|)POST(\'|"|)\b[^>]*>)', re.IGNORECASE)
+    
+html_types = ('text/html', 'application/xhtml+xml')            
 
     def process_request(self):
         query = self.request.META["QUERY_STRING"]
