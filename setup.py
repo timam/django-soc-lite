@@ -7,6 +7,8 @@ setup(
     install_requires=[
         "shellescape",
         "click",
+        "re",
+        "md5",
         "requests",
     ],
     packages=find_packages(exclude=["tests*"]),
