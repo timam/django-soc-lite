@@ -21,7 +21,7 @@ def detected(request):
         "client_id": client_id,
         "timestamp": datetime.utcnow(),
         "data": json.dumps({
-        "event": "XSS attempt",
+        "event": "CSRF attempt",
             "url": self.request.path,
             "query_string": query,
         })
