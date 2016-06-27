@@ -38,15 +38,15 @@ def get_client_versions():
 
 
 def send_client_info():
-    with open(os.path.join(settings_directory, "last_updated"), "r") as f:
-        last_updated = datetime.strptime(f.read(), "%Y-%m-%d %H:%M:%S")
+    f = open(os.path.join(settings_directory, 'last_updated'),'r').readline()
+    last_updated = datetime.strptime(f, "%Y-%m-%d %H:%M:%S")
 
     if (datetime.utcnow() - last_updated).days >= 1:
         try:
             get_client_versions()
 
             with open(
-                    os.path.join(settings_directory, "last_updated"), "r"
+                    os.path.join(settings_directory, "last_updated"), "w"
             ) as f:
                 f.write(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))
         except ServerUnreachableError:
