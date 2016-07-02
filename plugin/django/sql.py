@@ -4,4 +4,9 @@ def user_contacts(request):
     user = request.GET['username']
     sql = "SELECT * FROM user_contacts WHERE username = %s"
     cursor = connection.cursor()
-    cursor.execute(sql, [user])
+    c = connection.cursor()
+try:
+    c.execute(sql, [user])
+finally:
+    c.close()
+  
