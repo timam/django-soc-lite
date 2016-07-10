@@ -20,7 +20,7 @@ class ThreatSessionMiddleware(object):
             request.session.save()
         else:
             if fingerprint != request.META["HTTP_USER_AGENT"]:
-                url = "http://{0}:{1}/log/new".format(server, port)
+                url = "http://127.0.0.1:8000/log/new".format(server, port)
 
                 wanted_headers = [
                     "HTTP_USER_AGENT", "REMOTE_ADDR", "REMOTE_HOST"
