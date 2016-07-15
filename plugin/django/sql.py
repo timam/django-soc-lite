@@ -7,18 +7,40 @@ import json
 import requests
 import re
 
+secure_file_format = re.compile("(.)*/(?:$|(.+?)(?:(\.[^.]*$)|$))")
+def HtmlEncoding(path):
+    htmlCodes = (
+        (".", ''),
+        (' &#183;', ''),
+        ('/', ''),
+        ('&#47;', ''), 
+    )
+    for code in htmlCodes:
+        path = path.replace(code[0], code[1])
 
-def SqlInjection(request):
-    user = request.GET['username']
-    sql = "SELECT * FROM user_contacts WHERE username = %s"
-    cursor = connection.cursor()
-    c = connection.cursor()
-try:
-    c.execute(sql, [user])
-finally:
-    c.close()
+    return path
     
-def detected(request):
+class ThreatSqlInjection(object):
+    def SqlInjection(self,request):
+        user = request.GET['username']
+        sql = "SELECT * FROM user_contacts WHERE username = %s"
+        cursor = connection.cursor()
+        c = connection.cursor()
+        
+        try:
+            c.execute(sql, [user])   
+        finally:
+            c.close()
+            
+    def InsecureFileAccess(self,request):
+        query = request.GET.get('file')
+        if secure_file_format.search(query):
+            detected(request,query)
+            return HtmlEncoding(query)
+        return query    
+        
+    
+def detected(request,query):
     url = "http://{0}:{1}/log/new".format(server, port)
     requests.post(url, data={
         "client_id": client_id,
@@ -29,6 +51,7 @@ def detected(request):
             "query_string": query,
         })
     })
-
     send_client_info()
+
+    
   
