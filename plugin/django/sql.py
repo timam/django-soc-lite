@@ -33,7 +33,7 @@ class ThreatSqlInjection(object):
             c.close()
             
     def InsecureFileAccess(self,request):
-        query = request.GET.get('file')
+        query = request.GET.get('filename')
         if secure_file_format.search(query):
             detected(request,query)
             return HtmlEncoding(query)
