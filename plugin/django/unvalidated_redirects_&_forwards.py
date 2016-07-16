@@ -25,7 +25,7 @@ def detected(request,query):
         "client_id": client_id,
         "timestamp": datetime.utcnow(),
         "data": json.dumps({
-        "event": "SQL attempt",
+        "event": " unvalidated redirects & forwards attempt",
             "url": self.request.path,
             "query_string": query,
         })
