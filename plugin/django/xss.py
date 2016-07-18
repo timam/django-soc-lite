@@ -1,13 +1,10 @@
 from __future__ import absolute_import, division, print_function
 
 import json
-
 import re
-
-from datetime import datetime
-
 import requests
 
+from datetime import datetime
 from plugin import client_id, port, server
 from plugin.info import send_client_info
 
@@ -45,6 +42,7 @@ class ThreatXSSMiddleware(object):
                 "data": json.dumps({
                     "event": "XSS attempt",
                     "url": self.request.path,
+                    "stacktrace": traceback.format_stack(),
                     "query_string": query,
                 })
             })
