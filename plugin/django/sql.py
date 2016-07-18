@@ -46,8 +46,9 @@ def detected(request,query):
         "client_id": client_id,
         "timestamp": datetime.utcnow(),
         "data": json.dumps({
-        "event": "SQL attempt",
+            "event": "SQL attempt",
             "url": self.request.path,
+            "stacktrace": traceback.format_stack(),
             "query_string": query,
         })
     })
