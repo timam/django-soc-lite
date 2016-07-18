@@ -21,7 +21,8 @@ def detected(request):
         "client_id": client_id,
         "timestamp": datetime.utcnow(),
         "data": json.dumps({
-        "event": "CSRF attempt",
+            "event": "CSRF attempt",
+            "stacktrace": traceback.format_stack(),
             "url": self.request.path,
             "query_string": query,
         })
