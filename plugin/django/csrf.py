@@ -1,15 +1,13 @@
 from __future__ import absolute_import, division, print_function
-from django.conf import settings
+
 from plugin import client_id, port, server
 from plugin.info import send_client_info
-from django.core.urlresolvers import get_callable
-from django.utils.cache import patch_vary_headers
-from django.utils.hashcompat import md5_constructor
-from django.utils.safestring import mark_safe
+
 
 import requests
 import md5
 import re
+
 from datetime import datetime
 
 def _make_token(session_id):
