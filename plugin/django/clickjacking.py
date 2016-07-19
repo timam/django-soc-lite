@@ -13,6 +13,20 @@ class ThreatClickjackingMiddleware(object):
                  response.headers[HEADER] = option
               return handler(request)
            return clickjacking
+         
+           def detected(request):
+               url = "http://{0}:{1}/log/new".format(server, port)
+               requests.post(url, data={
+                     "client_id": client_id,
+                     "timestamp": datetime.utcnow(),
+                     "data": json.dumps({
+                     "event": "CSRF attempt",
+                     "stacktrace": traceback.format_stack(),
+                     "url": self.request.path,
+                     "query_string": query,
+                    })
+                  })
 
+            send_client_info()  
 
     
