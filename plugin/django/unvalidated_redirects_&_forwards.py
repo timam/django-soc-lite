@@ -1,16 +1,19 @@
+from django.conf import settings
 from datetime import datetime
 from plugin import client_id, port, server
 from plugin.info import send_client_info
+from urlparse import urlparse, urljoin
 
 import json
 import requests
 
-_ALLOWED_HOST = '' #determinr allowed host list from app
+_ALLOWED_HOST = settings.ALLOWED_HOSTS    #determinr allowed host list from app
 
-class ThreatRedirect&Forward(object):
+class ThreatRedirectAndForward(object):
     def Redirect(self,request):
         url = request.GET.get('url')
-        if not _ALLOWED_HOST.match(url):
+        target_url = urlparse(url)
+        if target_url.netloc not in _ALLOWED_HOST:
             detected(request,url)
             return False
             
