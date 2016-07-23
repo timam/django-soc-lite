@@ -9,14 +9,12 @@ colorama==0.3.3
 cryptography==1.0.1
 debtcollector==0.8.0
 defer==1.0.6
-Django==1.9.7
 dogpile.cache==0.5.4
 dogpile.core==0.4.1
 enum34==1.0.4
 html5lib==0.999
 httplib2==0.9
 idna==2.0
-immunio==1.9.2
 ipaddress==1.0.14
 iso8601==0.1.10
 keyring==4.0
