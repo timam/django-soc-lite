@@ -1,4 +1,3 @@
-from django.db import connection
 from datetime import datetime
 from plugin import client_id, port, server
 from plugin.info import send_client_info
@@ -6,6 +5,7 @@ from plugin.info import send_client_info
 import json
 import requests
 import re
+import psycopg2
 
 secure_file_format = re.compile("(.)*/(?:$|(.+?)(?:(\.[^.]*$)|$))")
 def HtmlEncoding(path):
@@ -23,9 +23,9 @@ def HtmlEncoding(path):
 class ThreatSqlInjection(object):
     def SqlInjection(self,request):
         user = request.GET['username']
-        sql = "SELECT * FROM user_contacts WHERE username = %s"
+        sql ="update username set name=%s where id=%s"
         cursor = connection.cursor()
-        c = connection.cursor()
+        return cursor.execute(sql, (name, id))
         
         try:
             c.execute(sql, [user])   
