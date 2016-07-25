@@ -51,6 +51,9 @@ def HtmlEncoding(maliciouscode):
     return maliciouscode
 
 class ThreatEquationMiddleware(object):
+
+    @add_hooks
+    @hook_templates
     def process_request(self, request):
         self.request = request
         self.query = request.META.get('QUERY_STRING')
