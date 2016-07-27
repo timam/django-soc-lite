@@ -32,6 +32,7 @@ def hook_templates(run_hook, timer):
         return
 
 xss_strict = re.compile("((%3C|<)[^\n]+(%3E|>))|((%3C|<)/[^\n]+(%3E|>))|(document.)")
+secure_file_format = re.compile("(.)*/(?:$|(.+?)(?:(\.[^.]*$)|$))")       #def FileInjection():
 
 def HtmlEncoding(maliciouscode):
     htmlCodes = (
@@ -56,12 +57,17 @@ class ThreatEquationMiddleware(object):
     @hook_templates
     def process_request(self, request):
         self.request = request
-        self.query = request.META.get('QUERY_STRING')
         self.XSSMiddleware()
         self.INJECTIONMiddleware()
         
-    def XSSMiddleware(self):    
-        if xss_strict.search(self.query):
+    def XSSMiddleware(self):
+        query = self.request.META.get('QUERY_STRING')
+        q = QueryDict(query)
+        dict = q.dict()
+        list = [k for k in dict]
+        parameter = list[0]
+        value = dict[dict.keys()[0]]
+        if xss_strict.search(str(value)):
             url = "http://127.0.0.1:8000/log/new".format(server, port)
             requests.post(url, data={
                 "client_id": client_id,
@@ -74,19 +80,49 @@ class ThreatEquationMiddleware(object):
                 })
             })
             #send_client_info()
-            q = QueryDict(self.query)
+            self.request.META['QUERY_STRING']=str(parameter)+'='+str(HtmlEncoding(value))
+           
+        
+    def INJECTIONMiddleware(self):
+        def SQLInjection():
+            self.request.POST = self.request.POST.copy()
+            l = [k for k in self.request.POST]
+            if not l:
+                return False
+            parm = l[0] 
+            value = self.request.POST.get(par)
+            # perform operation on value
+            re = True
+            if re:
+                self.request.POST.update({ parm: 'green' })
+                return True
+
+        def FileInjection():
+            query = self.request.META.get('QUERY_STRING') 
+            if query is None or query == '':
+                return False
+            q = QueryDict(query)
             dict = q.dict()
             list = [k for k in dict]
             parameter = list[0]
             value = dict[dict.keys()[0]]
-            self.request.META['QUERY_STRING']=str(parameter)+'='+str(HtmlEncoding(query))
-           
-        
-    def INJECTIONMiddleware(self):
-        pass
-
-
-
-
-        
-    
+            
+            if secure_file_format.search(value):
+                url = "http://127.0.0.1:8000/log/new".format(server, port)
+                requests.post(url, data={
+                    "client_id": client_id,
+                    "timestamp": datetime.utcnow(),
+                    "data": json.dumps({
+                        "event": "SQL attempt",
+                        "url": self.request.path,
+                        "stacktrace": traceback.format_stack(),
+                        "query_string": query,
+                    })
+                })
+                self.request.META['QUERY_STRING']=str(parameter)+'='+str(HtmlEncoding(value))    #html encoding
+                return True
+            
+            
+        if not SQLInjection():
+            FileInjection()
+ 
