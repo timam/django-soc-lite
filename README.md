@@ -3,7 +3,7 @@
 
 #. Add the following middleware to your project's `MIDDLEWARE_CLASSES` in `settings.py` file:
 
-	``'plugin.django.middleware.DebugToolbarMiddleware',``
+	``'plugin.django.middleware.ThreatEquationMiddleware',``
 	
 then you are on our plugin now #kepp testing
 
