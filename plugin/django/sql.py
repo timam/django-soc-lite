@@ -40,7 +40,7 @@ class ThreatSqlInjection(object):
         return query    
         
     
-def detected(request,query):
+def detected(query):
     url = "http://{0}:{1}/log/new".format(server, port)
     requests.post(url, data={
         "client_id": client_id,
