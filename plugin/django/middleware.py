@@ -8,7 +8,7 @@ from datetime import datetime
 from plugin import client_id, port, server
 from plugin.info import send_client_info
 from django.http import QueryDict, HttpResponse
-
+from HTML_encode import HTMLEncoding
 def add_hooks(run_hook, get_agent_func=None, timer=None):
     try:
         import django
@@ -34,22 +34,7 @@ def hook_templates(run_hook, timer):
 xss_strict = re.compile("((%3C|<)[^\n]+(%3E|>))|((%3C|<)/[^\n]+(%3E|>))|(document.)")
 secure_file_format = re.compile("(.)*/(?:$|(.+?)(?:(\.[^.]*$)|$))")       #def FileInjection():
 
-def HtmlEncoding(maliciouscode):
-    htmlCodes = (
-        ("'", '&#39;'),
-        ('"', '&quot;'),
-        ('>', '&gt;'),
-        ('<', '&lt;'),
-        ('%3C', '&lt;'),
-        ('%3E', '&gt;'),
-        ('&', '&amp;'),
-        ('/', '&#x2F;'),
-        ('document.', 'dom'),
-    )
-    for code in htmlCodes:
-        maliciouscode = maliciouscode.replace(code[0], code[1])
-
-    return maliciouscode
+encoding = HTMLEncoding()
 
 class ThreatEquationMiddleware(object):
 
@@ -59,6 +44,11 @@ class ThreatEquationMiddleware(object):
         self.request = request
         self.XSSMiddleware()
         self.INJECTIONMiddleware()
+        #self.CSRFMiddleware()
+        #self.SESSIONMiddleware()
+        #self.CSRFMiddleware()
+        #self.CSRFMiddleware()
+        
         
     def XSSMiddleware(self):
         query = self.request.META.get('QUERY_STRING')
@@ -80,7 +70,7 @@ class ThreatEquationMiddleware(object):
                 })
             })
             #send_client_info()
-            self.request.META['QUERY_STRING']=str(parameter)+'='+str(HtmlEncoding(value))
+            self.request.META['QUERY_STRING']=str(parameter)+'='+str(encoding.XSSEncode(value))
            
         
     def INJECTIONMiddleware(self):
@@ -119,7 +109,7 @@ class ThreatEquationMiddleware(object):
                         "query_string": query,
                     })
                 })
-                self.request.META['QUERY_STRING']=str(parameter)+'='+str(HtmlEncoding(value))    #html encoding
+                self.request.META['QUERY_STRING']=str(parameter)+'='+str(encoding.FileInjectionEncode(value))    
                 return True
             
             
