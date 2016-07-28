@@ -7,6 +7,7 @@ import requests
 import re
 import psycopg2
 
+sql_strict=re.compile(r"%-?\d*\*?\.?\d*\*?s")
 secure_file_format = re.compile("(.)*/(?:$|(.+?)(?:(\.[^.]*$)|$))")
 def HtmlEncoding(path):
     htmlCodes = (
@@ -40,17 +41,18 @@ class ThreatSqlInjection(object):
         return query    
         
     
-def detected(query):
-    url = "http://{0}:{1}/log/new".format(server, port)
-    requests.post(url, data={
-        "client_id": client_id,
-        "timestamp": datetime.utcnow(),
-        "data": json.dumps({
-            "event": "SQL attempt",
-            "url": self.request.path,
-            "stacktrace": traceback.format_stack(),
-            "query_string": query,
-        })
+    def detected(query):
+        if sql_strict.search(str(value)):
+           url = "http://{0}:{1}/log/new".format(server, port)
+           requests.post(url, data={
+                    "client_id": client_id,
+                    "timestamp": datetime.utcnow(),
+                    "data": json.dumps({
+                        "event": "SQL attempt",
+                        "url": self.request.path,
+                        "stacktrace": traceback.format_stack(),
+                        "query_string": query,
+                    })
     })
     send_client_info()
 
