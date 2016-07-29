@@ -1,5 +1,5 @@
 from flask import session,request
-from flask.compat import iteritems
+from plugin_flask.compat import iteritems
 class FlaskMiddleware(object):
 
     def __init__(self,app=None):
