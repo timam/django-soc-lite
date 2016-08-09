@@ -8,7 +8,7 @@ from datetime import datetime
 from plugin import client_id, port, server
 from plugin.info import send_client_info
 from django.http import QueryDict, HttpResponse
-from HTML_encode import HTMLEncoding
+from plugin.HTML_Encode import HTMLEncoding
 def add_hooks(run_hook, get_agent_func=None, timer=None):
     try:
         import django
@@ -58,17 +58,24 @@ class ThreatEquationMiddleware(object):
         parameter = list[0]
         value = dict[dict.keys()[0]]
         if xss_strict.search(str(value)):
-            url = "http://127.0.0.1:8000/log/new".format(server, port)
-            requests.post(url, data={
-                "client_id": client_id,
-                "timestamp": datetime.utcnow(),
-                "data": json.dumps({
-                    "event": "XSS attempt",
-                    "url": self.request.path,
-                    "stacktrace": traceback.format_stack(),
-                    "query_string": query,
+            #url = "http://127.0.0.1:8000/log/new".format(server, port)
+            with open(os.path.join(os.path.expanduser("~"),'log',)) as f:
+                data = json.load(f) 
+                read={
+                    "client_id": client_id,
+                    "timestamp": datetime.utcnow(),
+                        "data": json.dump({
+                        "event": "XSS attempt",
+                        "url": self.request.path,
+                        "stacktrace": traceback.format_stack(),
+                        "query_string": query,
+                    })
                 })
-            })
+            data.append(read)
+            with open(os.path.join(os.path.expanduser("~"),'log',),'w') as f:
+               json.dump(data, f)
+            
+                
             #send_client_info()
             self.request.META['QUERY_STRING']=str(parameter)+'='+str(encoding.XSSEncode(value))
            
@@ -98,19 +105,23 @@ class ThreatEquationMiddleware(object):
             value = dict[dict.keys()[0]]
             
             if secure_file_format.search(value):
-                url = "http://127.0.0.1:8000/log/new".format(server, port)
-                requests.post(url, data={
+                with open(os.path.join(os.path.expanduser("~"),'log',)) as f:
+                data = json.load(f) 
+                read={
                     "client_id": client_id,
                     "timestamp": datetime.utcnow(),
-                    "data": json.dumps({
-                        "event": "SQL attempt",
+                        "data": json.dump({
+                        "event": "sql attempt",
                         "url": self.request.path,
                         "stacktrace": traceback.format_stack(),
                         "query_string": query,
                     })
                 })
-                self.request.META['QUERY_STRING']=str(parameter)+'='+str(encoding.FileInjectionEncode(value))    
-                return True
+            data.append(read)
+            with open(os.path.join(os.path.expanduser("~"),'log',),'w') as f:
+               json.dump(data, f)
+            self.request.META['QUERY_STRING']=str(parameter)+'='+str(encoding.FileInjectionEncode(value))    
+            return True
             
             
         if not SQLInjection():

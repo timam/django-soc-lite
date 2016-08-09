@@ -1,7 +1,7 @@
 class HTMLEncoding(object):
     def __init__(self):
         pass
-    def XSSEncode(self, s):
+    def XSSEncode(self, maliciouscode):
         htmlCodes = (
             ("'", '&#39;'),
             ('"', '&quot;'),
@@ -29,3 +29,4 @@ class HTMLEncoding(object):
             path = path.replace(code[0], code[1])
 
         return path
+
