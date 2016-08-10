@@ -8,7 +8,7 @@ from datetime import datetime
 
 import requests
 
-from plugin import client_id, port, server, settings_directory
+from plugin import client_id, port, server
 
 
 class ServerUnreachableError(Exception):

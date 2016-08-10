@@ -18,7 +18,7 @@ class HTMLEncoding(object):
 
         return maliciouscode
         
-    def FileInjectionEncode(self, s):
+    def FileInjectionEncode(self, path):
         htmlCodes = (
             (".", ''),
             (' &#183;', ''),
