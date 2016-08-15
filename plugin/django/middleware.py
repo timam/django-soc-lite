@@ -161,7 +161,7 @@ class ThreatEquationMiddleware(object):
         if url_strict.search(str(value)):
             m = re.search('(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*',str(value))
             if m.group('host') != self.request.META.get('REMOTE_ADDR'):
-                self.request.META['QUERY_STRING']=str(parameter)+'='+str('http://localhost:8000')
+                self.request.META['QUERY_STRING']=str(parameter)+'='+str('http://'+self.request.META['HTTP_HOST'])
             return
         return
                 
