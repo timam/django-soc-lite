@@ -33,7 +33,12 @@ def hook_templates(run_hook, timer):
         return
 """
 xss_strict = re.compile("((%3C|<)[^\n]+(%3E|>))|((%3C|<)/[^\n]+(%3E|>))|(document.)")
-secure_file_format = re.compile("(.)*/(?:$|(.+?)(?:(\.[^.]*$)|$))")       #def FileInjection():
+sql_strict = re.compile("(\w*((\%27)|(\'))((\%6F)|o|(\%4F))((\%72)|r|(\%52)))|((\%3D)|(=)|(>)|(<))[^\n]*((\%27)|(\')|(\-\-)|(\%3B)|(;))|(;(\s\w+)+|;|--;|;--)")
+rce_strict = re.compile("run()|(p)*open()|delete()|write()|flush()|read(line)*()|call()|system()|format()|getstatus(output)*|communicate()|check_output()")
+secure_file_format = re.compile("\.\./[^\r\n]+")       #def FileInjection():
+url_strict = re.compile("(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?")
+
+
 
 encoding = HTMLEncoding()
 
@@ -45,7 +50,7 @@ class ThreatEquationMiddleware(object):
         self.request = request
         self.XSSMiddleware()
         self.INJECTIONMiddleware()
-        #self.CSRFMiddleware()
+        self.UnvalidateRedirects()
         #self.SESSIONMiddleware()
         #self.CSRFMiddleware()
         #self.CSRFMiddleware()
@@ -85,22 +90,43 @@ class ThreatEquationMiddleware(object):
             par = l[0] 
             value = self.request.POST.get(par)
             # perform operation on value
-            re = True
-            if re:
-                self.request.POST.update({ par: value })
+            if sql_strict.search(str(value)):
+                self.request.POST.update({ par: 'sql attack detected' })
                 return True
 
-        def FileInjection():
-            query = self.request.META.get('QUERY_STRING') 
-            if query is None or query == '':
+        def CommandInjection():
+            self.request.POST = self.request.POST.copy()
+            l = [k for k in self.request.POST]
+            if not l:
                 return False
+            par = l[0] 
+            value = self.request.POST.get(par)
+            print(par,value)
+            import base64
+            try:
+	        b = base64.decodestring(bytes(value, 'ascii'))
+	        decoded_string = b.decode("utf-8") 
+            except TypeError:
+	        try:
+		    decoded_string = base64.decodestring(value)
+	        except:
+	            decoded_string = value	
+            if rce_strict.search(str(decoded_string)):
+                self.request.POST.update({ par: 'Y29tbWFuZCBhdHRhY2sgZGV0ZWN0ZWQ=' })
+                return True
+
+        
+        def FileInjection():
+            query = self.request.META.get('QUERY_STRING')
+            if not query:
+                return 
             q = QueryDict(query)
             dict = q.dict()
             list = [k for k in dict]
             parameter = list[0]
             value = dict[dict.keys()[0]]
             
-            if secure_file_format.search(value):
+            if secure_file_format.search(str(value)):
                 """
                 url = "http://{0}:{1}/log/new".format(server, port)
                 requests.post(url, data={
@@ -113,10 +139,31 @@ class ThreatEquationMiddleware(object):
                     })
                 })
                 """
-            self.request.META['QUERY_STRING']=str(parameter)+'='+str(encoding.FileInjectionEncode(value))    
-            return True
+                self.request.META['QUERY_STRING']=str(parameter)+'='+str(encoding.FileInjectionEncode(value))    
+                return True
             
             
         if not SQLInjection():
-            FileInjection()
+            if not CommandInjection():
+                FileInjection()
+
+
+    def UnvalidateRedirects(self):
+        #print(self.request.META['SERVER_NAME'])
+        url = self.request.META.get('QUERY_STRING')
+        if not url:
+            return 
+        q = QueryDict(url)
+        dict = q.dict()
+        list = [k for k in dict]
+        parameter = list[0]
+        value = dict[dict.keys()[0]]
+        if url_strict.search(str(value)):
+            m = re.search('(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*',str(value))
+            if m.group('host') != self.request.META.get('REMOTE_ADDR'):
+                self.request.META['QUERY_STRING']=str(parameter)+'='+str('http://localhost:8000')
+            return
+        return
+                
+       
  
