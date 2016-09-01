@@ -3,14 +3,10 @@ class HTMLEncoding(object):
         pass
     def XSSEncode(self, maliciouscode):
         htmlCodes = (
-            ("'", '&#39;'),
-            ('"', '&quot;'),
             ('>', '&gt;'),
             ('<', '&lt;'),
             ('%3C', '&lt;'),
             ('%3E', '&gt;'),
-            ('&', '&amp;'),
-            ('/', '&#x2F;'),
             ('document.', 'dom'),
         )
         for code in htmlCodes:

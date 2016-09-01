@@ -3,12 +3,14 @@ from __future__ import absolute_import, division, print_function
 import json
 import re
 import requests
-
+import traceback
+from django.conf import settings
 from datetime import datetime
-from plugin import client_id, port, server
+from plugin import client_id, port, django_server
 from plugin.info import send_client_info
 from django.http import QueryDict, HttpResponse
 from plugin.HTML_Encode import HTMLEncoding
+from plugin.rules import xss_rule
 """
 def add_hooks(run_hook, get_agent_func=None, timer=None):
     try:
@@ -32,11 +34,13 @@ def hook_templates(run_hook, timer):
     except ImportError:
         return
 """
-xss_strict = re.compile("((%3C|<)[^\n]+(%3E|>))|((%3C|<)/[^\n]+(%3E|>))|(document.)")
+server = django_server
+
+xss_strict = re.compile(xss_rule)
 sql_strict = re.compile("(\w*((\%27)|(\'))((\%6F)|o|(\%4F))((\%72)|r|(\%52)))|((\%3D)|(=)|(>)|(<))[^\n]*((\%27)|(\')|(\-\-)|(\%3B)|(;))|(;(\s\w+)+|;|--;|;--)")
 rce_strict = re.compile("run()|(p)*open()|delete()|write()|flush()|read(line)*()|call()|system()|format()|getstatus(output)*|communicate()|check_output()")
 secure_file_format = re.compile("\.\./[^\r\n]+")       #def FileInjection():
-url_strict = re.compile("(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?")
+url_strict = re.compile("((http|https|ftp|ftps)\:\/\/)*[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?")
 
 
 
@@ -48,60 +52,126 @@ class ThreatEquationMiddleware(object):
     #@hook_templates
     def process_request(self, request):
         self.request = request
-        self.XSSMiddleware()
-        self.INJECTIONMiddleware()
-        self.UnvalidateRedirects()
+        if not self.XSSMiddleware():
+            if not self.INJECTIONMiddleware():
+                if not self.UnvalidateRedirects():
+                    pass
         #self.SESSIONMiddleware()
         #self.CSRFMiddleware()
         #self.CSRFMiddleware()
         
-        
+    def process_response(self, request, response):
+        if response.get('X-Frame-Options') is not None:
+            return response  
+        # Don't set it if they used @xframe_options_exempt
+        if getattr(response, 'xframe_options_exempt', False):
+            return response  
+        response['X-Frame-Options'] = self.get_xframe_options_value(request,response)
+        return response
+
+    def get_xframe_options_value(self, request, response):
+        return getattr(settings, 'X_FRAME_OPTIONS', 'SAMEORIGIN').upper()
+    
     def XSSMiddleware(self):
-        query = self.request.META.get('QUERY_STRING')
-        if not query:
-            return 
-        q = QueryDict(query)
-        dict = q.dict()
-        list = [k for k in dict]
-        parameter = list[0]
-        value = dict[dict.keys()[0]]
+        #print(self.request.META.get("HTTP_HOST"))
+        #print(self.request.get_full_path())
+        #base_url =  "{0}://{1}{2}".format(self.request.scheme, self.request.get_host(), self.request.path)
+        #print(base_url)
+        if self.request.method == 'GET':
+            query = self.request.META.get('QUERY_STRING')
+            if not query:
+                return False
+            q = QueryDict(query)
+            dict = q.dict()
+            list = [k for k in dict]
+            parameter = list[0]
+            value = dict[dict.keys()[0]]
+        if self.request.method == 'POST':
+            self.request.POST = self.request.POST.copy()
+            l = [k for k in self.request.POST]
+            if not l:
+                return False
+            parameter = l[0] 
+            value = self.request.POST.get(parameter)
+        
         if xss_strict.search(str(value)):
-            """
-            url = "http://{0}:{1}/log/new".format(server, port)
+            url = server
             requests.post(url, data={
                 "client_id": client_id,
                 "timestamp": datetime.utcnow(),
                 "data": json.dumps({
                     "event": "XSS attempt",
-                    "url": request.path,
+                    "url": self.request.path,
+                    "stacktrace": traceback.format_stack(),
                     "query_string": query,
                 })
             })
-            """    
             #send_client_info()
-            self.request.META['QUERY_STRING']=str(parameter+'='+encoding.XSSEncode(value))
+            if self.request.method == 'GET':
+                self.request.META['QUERY_STRING']=str(parameter+'='+encoding.XSSEncode(value))
+            if self.request.method == 'POST':
+                self.request.POST.update({ parameter: encoding.XSSEncode(value)})
+            return True
+        return False
+            
         
     def INJECTIONMiddleware(self):
         def SQLInjection():
-            self.request.POST = self.request.POST.copy()
-            l = [k for k in self.request.POST]
-            if not l:
-                return False
-            par = l[0] 
-            value = self.request.POST.get(par)
+            if self.request.method == 'POST':
+                self.request.POST = self.request.POST.copy()
+                l = [k for k in self.request.POST]
+                if not l:
+                    return False
+                par = l[0] 
+                value = self.request.POST.get(par)
+            if self.request.method == 'GET':
+                query = self.request.META.get('QUERY_STRING')
+                if not query:
+                    return False 
+                q = QueryDict(query)
+                dict = q.dict()
+                list = [k for k in dict]
+                par = list[0]
+                value = dict[dict.keys()[0]]
+            
             # perform operation on value
             if sql_strict.search(str(value)):
-                self.request.POST.update({ par: 'sql attack detected' })
-                return True
+                url = server
+                requests.post(url, data={
+                    "client_id": client_id,
+                    "timestamp": datetime.utcnow(),
+                    "data": json.dumps({
+                        "event": "sql attempt",
+                        "url": self.request.path,
+                        "stacktrace": traceback.format_stack(),
+                        "query_string": par+'='+value,
+                    })
+                })
+
+                if self.request.method == 'GET':
+                    self.request.META['QUERY_STRING']=str(par+'='+'sql attack detected')
+                if self.request.method == 'POST':
+                    self.request.POST.update({ par: 'sql attack detected'})
+                return True 
+            return False             
 
         def CommandInjection():
-            self.request.POST = self.request.POST.copy()
-            l = [k for k in self.request.POST]
-            if not l:
-                return False
-            par = l[0] 
-            value = self.request.POST.get(par)
-            print(par,value)
+            if self.request.method == 'POST':
+                self.request.POST = self.request.POST.copy()
+                l = [k for k in self.request.POST]
+                if not l:
+                    return False
+                par = l[0] 
+                value = self.request.POST.get(par)
+            if self.request.method == 'GET':
+                query = self.request.META.get('QUERY_STRING')
+                if not query:
+                    return False 
+                q = QueryDict(query)
+                dict = q.dict()
+                list = [k for k in dict]
+                par = list[0]
+                value = dict[dict.keys()[0]]
             import base64
             try:
 	        b = base64.decodestring(bytes(value, 'ascii'))
@@ -112,8 +182,23 @@ class ThreatEquationMiddleware(object):
 	        except:
 	            decoded_string = value	
             if rce_strict.search(str(decoded_string)):
-                self.request.POST.update({ par: 'Y29tbWFuZCBhdHRhY2sgZGV0ZWN0ZWQ=' })
-                return True
+                url = server
+                requests.post(url, data={
+                    "client_id": client_id,
+                    "timestamp": datetime.utcnow(),
+                    "data": json.dumps({
+                        "event": "os command attempt",
+                        "url": self.request.path,
+                        "stacktrace": traceback.format_stack(),
+                        "query_string": par+'='+value,
+                    })
+                })
+                if self.request.method == 'GET':
+                    self.request.META['QUERY_STRING']=str(par+'='+'Y29tbWFuZCBhdHRhY2sgZGV0ZWN0ZWQ=')
+                if self.request.method == 'POST':
+                    self.request.POST.update({ par: 'Y29tbWFuZCBhdHRhY2sgZGV0ZWN0ZWQ='})
+                return True 
+            return False       
 
         
         def FileInjection():
@@ -127,18 +212,17 @@ class ThreatEquationMiddleware(object):
             value = dict[dict.keys()[0]]
             
             if secure_file_format.search(str(value)):
-                """
-                url = "http://{0}:{1}/log/new".format(server, port)
+                url = server
                 requests.post(url, data={
                     "client_id": client_id,
                     "timestamp": datetime.utcnow(),
                     "data": json.dumps({
-                        "event": "XSS attempt",
-                        "url": request.path,
+                        "event": "file attempt",
+                        "url": self.request.path,
+                        "stacktrace": traceback.format_stack(),
                         "query_string": query,
                     })
                 })
-                """
                 self.request.META['QUERY_STRING']=str(parameter)+'='+str(encoding.FileInjectionEncode(value))    
                 return True
             
@@ -149,21 +233,30 @@ class ThreatEquationMiddleware(object):
 
 
     def UnvalidateRedirects(self):
-        #print(self.request.META['SERVER_NAME'])
-        url = self.request.META.get('QUERY_STRING')
-        if not url:
-            return 
-        q = QueryDict(url)
+        query = self.request.META.get('QUERY_STRING')
+        if not query:
+            return False
+        q = QueryDict(query)
         dict = q.dict()
         list = [k for k in dict]
         parameter = list[0]
         value = dict[dict.keys()[0]]
         if url_strict.search(str(value)):
-            m = re.search('(?:http.*://)?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*',str(value))
-            if m.group('host') != self.request.META.get('REMOTE_ADDR'):
-                self.request.META['QUERY_STRING']=str(parameter)+'='+str('http://'+self.request.META['HTTP_HOST'])
-            return
-        return
+            if str(value) != str(self.request.scheme+'://'+self.request.get_host()):
+                url = server
+                requests.post(url, data={
+                    "client_id": client_id,
+                    "timestamp": datetime.utcnow(),
+                    "data": json.dumps({
+                        "event": "rediretion attempt",
+                        "url": self.request.path,
+                        "stacktrace": traceback.format_stack(),
+                        "query_string": query,
+                    })
+                })
+                self.request.META['QUERY_STRING']=str(parameter)+'='+"{0}://{1}".format(self.request.scheme, self.request.get_host())
+                return True
+        return False
                 
        
  
