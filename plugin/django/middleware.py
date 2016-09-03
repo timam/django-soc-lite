@@ -10,7 +10,7 @@ from plugin import client_id, port, django_server
 from plugin.info import send_client_info
 from django.http import QueryDict, HttpResponse
 from plugin.HTML_Encode import HTMLEncoding
-from plugin.rules import xss_rule
+from plugin.rules import xss_rule, sql_rule
 """
 def add_hooks(run_hook, get_agent_func=None, timer=None):
     try:
@@ -37,7 +37,7 @@ def hook_templates(run_hook, timer):
 server = django_server
 
 xss_strict = re.compile(xss_rule)
-sql_strict = re.compile("(\w*((\%27)|(\'))((\%6F)|o|(\%4F))((\%72)|r|(\%52)))|((\%3D)|(=)|(>)|(<))[^\n]*((\%27)|(\')|(\-\-)|(\%3B)|(;))|(;(\s\w+)+|;|--;|;--)")
+sql_strict = re.compile(sql_rule)
 rce_strict = re.compile("run()|(p)*open()|delete()|write()|flush()|read(line)*()|call()|system()|format()|getstatus(output)*|communicate()|check_output()")
 secure_file_format = re.compile("\.\./[^\r\n]+")       #def FileInjection():
 url_strict = re.compile("((http|https|ftp|ftps)\:\/\/)*[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?")
@@ -124,6 +124,8 @@ class ThreatEquationMiddleware(object):
                     return False
                 par = l[0] 
                 value = self.request.POST.get(par)
+                content = value.lower()
+                content = content.replace("%20", " ")  
             if self.request.method == 'GET':
                 query = self.request.META.get('QUERY_STRING')
                 if not query:
@@ -133,9 +135,11 @@ class ThreatEquationMiddleware(object):
                 list = [k for k in dict]
                 par = list[0]
                 value = dict[dict.keys()[0]]
+                content = value.lower()
+                content = content.replace("%20", " ")  
             
             # perform operation on value
-            if sql_strict.search(str(value)):
+            if sql_strict.search(str(content)):
                 url = server
                 requests.post(url, data={
                     "client_id": client_id,
@@ -149,9 +153,9 @@ class ThreatEquationMiddleware(object):
                 })
 
                 if self.request.method == 'GET':
-                    self.request.META['QUERY_STRING']=str(par+'='+'sql attack detected')
+                    self.request.META['QUERY_STRING']=str(par+'='+sql_strict.sub('*sql injection here*',content))
                 if self.request.method == 'POST':
-                    self.request.POST.update({ par: 'sql attack detected'})
+                    self.request.POST.update({ par: sql_strict.sub('*sql injection here*',content)})
                 return True 
             return False             
 
