@@ -11,6 +11,7 @@ from plugin.info import send_client_info
 from django.http import QueryDict, HttpResponse
 from plugin.HTML_Encode import HTMLEncoding
 from plugin.rules import xss_rule, sql_rule
+from urllib import quote
 """
 def add_hooks(run_hook, get_agent_func=None, timer=None):
     try:
@@ -52,10 +53,11 @@ class ThreatEquationMiddleware(object):
     #@hook_templates
     def process_request(self, request):
         self.request = request
-        if not self.XSSMiddleware():
-            if not self.INJECTIONMiddleware():
-                if not self.UnvalidateRedirects():
-                    pass
+        if not self.CSRFMiddleware():
+            if not self.XSSMiddleware():
+                if not self.INJECTIONMiddleware():
+                    if not self.UnvalidateRedirects():
+                        pass
         #self.SESSIONMiddleware()
         #self.CSRFMiddleware()
         #self.CSRFMiddleware()
@@ -93,8 +95,9 @@ class ThreatEquationMiddleware(object):
                 return False
             parameter = l[0] 
             value = self.request.POST.get(parameter)
-        
-        if xss_strict.search(str(value)):
+        content = value.lower()
+        content = content.replace("%20", " ")
+        if xss_strict.search(str(content)):
             url = server
             requests.post(url, data={
                 "client_id": client_id,
@@ -103,7 +106,7 @@ class ThreatEquationMiddleware(object):
                     "event": "XSS attempt",
                     "url": self.request.path,
                     "stacktrace": traceback.format_stack(),
-                    "query_string": query,
+                    "query_string": parameter+'='+quote(value),
                 })
             })
             #send_client_info()
@@ -122,10 +125,8 @@ class ThreatEquationMiddleware(object):
                 l = [k for k in self.request.POST]
                 if not l:
                     return False
-                par = l[0] 
+                par = l[1] 
                 value = self.request.POST.get(par)
-                content = value.lower()
-                content = content.replace("%20", " ")  
             if self.request.method == 'GET':
                 query = self.request.META.get('QUERY_STRING')
                 if not query:
@@ -134,12 +135,14 @@ class ThreatEquationMiddleware(object):
                 dict = q.dict()
                 list = [k for k in dict]
                 par = list[0]
-                value = dict[dict.keys()[0]]
-                content = value.lower()
-                content = content.replace("%20", " ")  
+                value = dict[dict.keys()[0]] 
+            content = value.lower()
+            content = content.replace("%20", " ") 
+            value = value.replace("'", "''")  
             
             # perform operation on value
-            if sql_strict.search(str(content)):
+            #print(par+'='+str(value))
+            if sql_strict.search(content):
                 url = server
                 requests.post(url, data={
                     "client_id": client_id,
@@ -261,6 +264,25 @@ class ThreatEquationMiddleware(object):
                 self.request.META['QUERY_STRING']=str(parameter)+'='+"{0}://{1}".format(self.request.scheme, self.request.get_host())
                 return True
         return False
-                
+    
+    def CSRFMiddleware(self):
+        """if self.request.method == 'POST':
+            import django
+            print(self.request.COOKIES['csrftoken'])
+            print(self.request.POST.get("csrfmiddlewaretoken"))
+            print(self.request.META.get("X-Requested-With"))
+            token = django.middleware.csrf.get_token(self.request)
+            print(token)
+            try:
+                session_id = self.request.COOKIES[settings.SESSION_COOKIE_NAME]
+                print(session_id)
+            except KeyError:
+                # No session, no check required
+                print('not auth') 
+                #return 'rejected'
+            #csrf_token = _make_token(session_id)
+            #print(csrf_token)"""
+        return False        
+                       
        
  
