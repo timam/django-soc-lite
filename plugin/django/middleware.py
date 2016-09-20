@@ -3,15 +3,15 @@ from __future__ import absolute_import, division, print_function
 import json
 import re
 import requests
+import logging
 import traceback
 from django.conf import settings
-from datetime import datetime
-from plugin import client_id, port, django_server
 from plugin.info import send_client_info
 from django.http import QueryDict, HttpResponse
 from plugin.HTML_Encode import HTMLEncoding
 from plugin.rules import xss_rule, sql_rule
 from urllib import quote
+from logger import log
 """
 def add_hooks(run_hook, get_agent_func=None, timer=None):
     try:
@@ -98,17 +98,7 @@ class ThreatEquationMiddleware(object):
         content = value.lower()
         content = content.replace("%20", " ")
         if xss_strict.search(str(content)):
-            url = server
-            requests.post(url, data={
-                "client_id": client_id,
-                "timestamp": datetime.utcnow(),
-                "data": json.dumps({
-                    "event": "XSS attempt",
-                    "url": self.request.path,
-                    "stacktrace": traceback.format_stack(),
-                    "query_string": parameter+'='+quote(value),
-                })
-            })
+            logging.info(log(event= "XSS attempt", url= self.request.path, stacktrace= traceback.format_stack(), query_string= parameter+'='+quote(value)))            
             #send_client_info()
             if self.request.method == 'GET':
                 self.request.META['QUERY_STRING']=str(parameter+'='+encoding.XSSEncode(value))
@@ -138,25 +128,13 @@ class ThreatEquationMiddleware(object):
                 value = dict[dict.keys()[0]] 
             content = value.lower()
             content = content.replace("%20", " ") 
-            # perform operation on value
-            #print(par+'='+str(value))
+        
             if sql_strict.search(content):
-                url = server
-                requests.post(url, data={
-                    "client_id": client_id,
-                    "timestamp": datetime.utcnow(),
-                    "data": json.dumps({
-                        "event": "sql attempt",
-                        "url": self.request.path,
-                        "stacktrace": traceback.format_stack(),
-                        "query_string": par+'='+value,
-                    })
-                })
-
+                logging.info(log(event= "sql injection attempt", url= self.request.path, stacktrace= traceback.format_stack(), data= value))
                 if self.request.method == 'GET':
-                    self.request.META['QUERY_STRING']=str(par+'='+sql_strict.sub('*sql injection here*',content))
+                    self.request.META['QUERY_STRING']=str(par+'='+sql_strict.sub('',content))
                 if self.request.method == 'POST':
-                    self.request.POST.update({ par: sql_strict.sub('*sql injection here*',content)})
+                    self.request.POST.update({ par: sql_strict.sub('',content)})
                 return True 
             return False             
 
@@ -187,17 +165,7 @@ class ThreatEquationMiddleware(object):
 	        except:
 	            decoded_string = value	
             if rce_strict.search(str(decoded_string)):
-                url = server
-                requests.post(url, data={
-                    "client_id": client_id,
-                    "timestamp": datetime.utcnow(),
-                    "data": json.dumps({
-                        "event": "os command attempt",
-                        "url": self.request.path,
-                        "stacktrace": traceback.format_stack(),
-                        "query_string": par+'='+value,
-                    })
-                })
+                logging.info(log(event= "command injection attempt", url= self.request.path, stacktrace= traceback.format_stack(), data= value))
                 if self.request.method == 'GET':
                     self.request.META['QUERY_STRING']=str(par+'='+'Y29tbWFuZCBhdHRhY2sgZGV0ZWN0ZWQ=')
                 if self.request.method == 'POST':
@@ -217,17 +185,7 @@ class ThreatEquationMiddleware(object):
             value = dict[dict.keys()[0]]
             
             if secure_file_format.search(str(value)):
-                url = server
-                requests.post(url, data={
-                    "client_id": client_id,
-                    "timestamp": datetime.utcnow(),
-                    "data": json.dumps({
-                        "event": "file attempt",
-                        "url": self.request.path,
-                        "stacktrace": traceback.format_stack(),
-                        "query_string": query,
-                    })
-                })
+                logging.info(log(event= "file injection attempt", url= self.request.path, stacktrace= traceback.format_stack(), data= value))
                 self.request.META['QUERY_STRING']=str(parameter)+'='+str(encoding.FileInjectionEncode(value))    
                 return True
             
@@ -248,17 +206,7 @@ class ThreatEquationMiddleware(object):
         value = dict[dict.keys()[0]]
         if url_strict.search(str(value)):
             if str(value) != str(self.request.scheme+'://'+self.request.get_host()):
-                url = server
-                requests.post(url, data={
-                    "client_id": client_id,
-                    "timestamp": datetime.utcnow(),
-                    "data": json.dumps({
-                        "event": "rediretion attempt",
-                        "url": self.request.path,
-                        "stacktrace": traceback.format_stack(),
-                        "query_string": query,
-                    })
-                })
+                logging.info(log(event= "redirection attempt", url= self.request.path, stacktrace= traceback.format_stack(), query_string= parameter+'='+quote(value)))
                 self.request.META['QUERY_STRING']=str(parameter)+'='+"{0}://{1}".format(self.request.scheme, self.request.get_host())
                 return True
         return False
