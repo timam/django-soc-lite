@@ -11,7 +11,7 @@ from django.http import QueryDict, HttpResponse
 from plugin.HTML_Encode import HTMLEncoding
 from plugin.rules import xss_rule, sql_rule
 from urllib import quote
-from logger import log
+from plugin.django.logger import log
 """
 def add_hooks(run_hook, get_agent_func=None, timer=None):
     try:
@@ -35,7 +35,6 @@ def hook_templates(run_hook, timer):
     except ImportError:
         return
 """
-server = django_server
 
 xss_strict = re.compile(xss_rule)
 sql_strict = re.compile(sql_rule)
@@ -76,7 +75,6 @@ class ThreatEquationMiddleware(object):
     
     def XSSMiddleware(self):
         #print(self.request.META.get("HTTP_HOST"))
-        #print(self.request.get_full_path())
         #base_url =  "{0}://{1}{2}".format(self.request.scheme, self.request.get_host(), self.request.path)
         #print(base_url)
         if self.request.method == 'GET':
@@ -98,7 +96,7 @@ class ThreatEquationMiddleware(object):
         content = value.lower()
         content = content.replace("%20", " ")
         if xss_strict.search(str(content)):
-            logging.info(log(event= "XSS attempt", url= self.request.path, stacktrace= traceback.format_stack(), query_string= parameter+'='+quote(value)))            
+            logging.info(log(event= "XSS attempt", url= self.request.path, stacktrace= traceback.format_stack(), query_string= str(parameter+'='+quote(value))))            
             #send_client_info()
             if self.request.method == 'GET':
                 self.request.META['QUERY_STRING']=str(parameter+'='+encoding.XSSEncode(value))
@@ -206,7 +204,7 @@ class ThreatEquationMiddleware(object):
         value = dict[dict.keys()[0]]
         if url_strict.search(str(value)):
             if str(value) != str(self.request.scheme+'://'+self.request.get_host()):
-                logging.info(log(event= "redirection attempt", url= self.request.path, stacktrace= traceback.format_stack(), query_string= parameter+'='+quote(value)))
+                logging.info(log(event= "redirection attempt", url= self.request.path, stacktrace= traceback.format_stack(), query_string= str(parameter+'='+quote(value))))
                 self.request.META['QUERY_STRING']=str(parameter)+'='+"{0}://{1}".format(self.request.scheme, self.request.get_host())
                 return True
         return False
