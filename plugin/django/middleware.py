@@ -138,8 +138,6 @@ class ThreatEquationMiddleware(object):
                 value = dict[dict.keys()[0]] 
             content = value.lower()
             content = content.replace("%20", " ") 
-            value = value.replace("'", "''")  
-            
             # perform operation on value
             #print(par+'='+str(value))
             if sql_strict.search(content):
