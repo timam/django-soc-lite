@@ -12,6 +12,7 @@ from plugin.HTML_Encode import HTMLEncoding
 from plugin.rules import xss_rule, sql_rule
 from urllib import quote
 from plugin.django.logger import log
+from plugin.verify import Client_Verify
 """
 def add_hooks(run_hook, get_agent_func=None, timer=None):
     try:
@@ -47,10 +48,12 @@ url_strict = re.compile("((http|https|ftp|ftps)\:\/\/)*[a-zA-Z0-9\-\.]+\.[a-zA-Z
 encoding = HTMLEncoding()
 
 class ThreatEquationMiddleware(object):
-
     #@add_hooks
     #@hook_templates
     def process_request(self, request):
+        import os
+        v = Client_Verify(os)
+        print(v.check())
         self.request = request
         if not self.CSRFMiddleware():
             if not self.XSSMiddleware():
