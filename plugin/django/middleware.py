@@ -10,7 +10,10 @@ from plugin.info import send_client_info
 from django.http import QueryDict, HttpResponse
 from plugin.HTML_Encode import HTMLEncoding
 from plugin.rules import xss_rule, sql_rule
-from urllib import quote
+try:
+    from urllib.parse import quote
+except ImportError:
+    from urllib import quote 
 from plugin.django.logger import log
 from plugin.verify import Client_Verify
 """
@@ -116,7 +119,7 @@ class ThreatEquationMiddleware(object):
                 l = [k for k in self.request.POST]
                 if not l:
                     return False
-                par = l[1] 
+                par = l[0] 
                 value = self.request.POST.get(par)
             if self.request.method == 'GET':
                 query = self.request.META.get('QUERY_STRING')
@@ -158,13 +161,13 @@ class ThreatEquationMiddleware(object):
                 value = dict[dict.keys()[0]]
             import base64
             try:
-	        b = base64.decodestring(bytes(value, 'ascii'))
-	        decoded_string = b.decode("utf-8") 
+	            b = base64.decodestring(bytes(value, 'ascii'))
+	            decoded_string = b.decode("utf-8") 
             except TypeError:
-	        try:
-		    decoded_string = base64.decodestring(value)
-	        except:
-	            decoded_string = value	
+	            try:
+		            decoded_string = base64.decodestring(value)
+	            except:
+	                decoded_string = value	
             if rce_strict.search(str(decoded_string)):
                 logging.info(log(event= "command injection attempt", url= self.request.path, stacktrace= traceback.format_stack(), data= value))
                 if self.request.method == 'GET':
