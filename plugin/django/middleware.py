@@ -43,7 +43,7 @@ def hook_templates(run_hook, timer):
 xss_strict = re.compile(xss_rule)
 sql_strict = re.compile(sql_rule)
 rce_strict = re.compile("run()|(p)*open()|delete()|write()|flush()|read(line)*()|call()|system()|format()|getstatus(output)*|communicate()|check_output()")
-secure_file_format = re.compile("\.\./[^\r\n]+")       #def FileInjection():
+secure_file_format = re.compile("((.)*/)")       #def FileInjection():
 url_strict = re.compile("((http|https|ftp|ftps)\:\/\/)*[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?")
 
 
@@ -83,15 +83,25 @@ class ThreatEquationMiddleware(object):
         #print(self.request.META.get("HTTP_HOST"))
         #base_url =  "{0}://{1}{2}".format(self.request.scheme, self.request.get_host(), self.request.path)
         #print(base_url)
-        if self.request.method == 'GET':
-            query = self.request.META.get('QUERY_STRING')
+        from plugin.django.xss import XSSMiddleware1
+        XSSMiddleware1(self.request)
+        print(self.request.META.get('QUERY_STRING'))
+        """if self.request.method == 'GET':
+            query = self.request.META.get('QUERY_STRING') 
             if not query:
-                return False
+                try:
+                    path = self.request.path
+                    import os.path
+                    print(os.path.split(path)[1])
+                    #self.request.path_info = '/injection'
+                    return True
+                except IndexError:
+                    return False       
             q = QueryDict(query)
             dict = q.dict()
             list = [k for k in dict]
             parameter = list[0]
-            value = dict[dict.keys()[0]]
+            value = dict[parameter]
         if self.request.method == 'POST':
             self.request.POST = self.request.POST.copy()
             l = [k for k in self.request.POST]
@@ -99,8 +109,6 @@ class ThreatEquationMiddleware(object):
                 return False
             parameter = l[0] 
             value = self.request.POST.get(parameter)
-        content = value.lower()
-        content = content.replace("%20", " ")
         if xss_strict.search(str(content)):
             logging.info(log(event= "XSS attempt", url= self.request.path, stacktrace= traceback.format_stack(), query_string= str(parameter+'='+quote(value))))            
             #send_client_info()
@@ -110,7 +118,7 @@ class ThreatEquationMiddleware(object):
                 self.request.POST.update({ parameter: encoding.XSSEncode(value)})
             return True
         return False
-            
+        """    
         
     def INJECTIONMiddleware(self):
         def SQLInjection():
@@ -129,7 +137,7 @@ class ThreatEquationMiddleware(object):
                 dict = q.dict()
                 list = [k for k in dict]
                 par = list[0]
-                value = dict[dict.keys()[0]] 
+                value = dict[par]
             content = value.lower()
             content = content.replace("%20", " ") 
         
@@ -158,8 +166,11 @@ class ThreatEquationMiddleware(object):
                 dict = q.dict()
                 list = [k for k in dict]
                 par = list[0]
-                value = dict[dict.keys()[0]]
+                value = dict[par]
+                #print(value)
+
             import base64
+            """
             try:
 	            b = base64.decodestring(bytes(value, 'ascii'))
 	            decoded_string = b.decode("utf-8") 
@@ -168,7 +179,9 @@ class ThreatEquationMiddleware(object):
 		            decoded_string = base64.decodestring(value)
 	            except:
 	                decoded_string = value	
-            if rce_strict.search(str(decoded_string)):
+            """
+        
+            if rce_strict.search(str(value)):
                 logging.info(log(event= "command injection attempt", url= self.request.path, stacktrace= traceback.format_stack(), data= value))
                 if self.request.method == 'GET':
                     self.request.META['QUERY_STRING']=str(par+'='+'Y29tbWFuZCBhdHRhY2sgZGV0ZWN0ZWQ=')
@@ -186,11 +199,12 @@ class ThreatEquationMiddleware(object):
             dict = q.dict()
             list = [k for k in dict]
             parameter = list[0]
-            value = dict[dict.keys()[0]]
+            value = dict[parameter]
             
             if secure_file_format.search(str(value)):
-                logging.info(log(event= "file injection attempt", url= self.request.path, stacktrace= traceback.format_stack(), data= value))
-                self.request.META['QUERY_STRING']=str(parameter)+'='+str(encoding.FileInjectionEncode(value))    
+                #logging.info(log(event= "file injection attempt", url= self.request.path, stacktrace= traceback.format_stack(), data= value))         
+                print(secure_file_format.sub('',value)) 
+                self.request.META['QUERY_STRING']=str(parameter)+'='+str(secure_file_format.sub('',value))    
                 return True
             
             
@@ -207,11 +221,11 @@ class ThreatEquationMiddleware(object):
         dict = q.dict()
         list = [k for k in dict]
         parameter = list[0]
-        value = dict[dict.keys()[0]]
+        value = dict[parameter]
         if url_strict.search(str(value)):
             if str(value) != str(self.request.scheme+'://'+self.request.get_host()):
                 logging.info(log(event= "redirection attempt", url= self.request.path, stacktrace= traceback.format_stack(), query_string= str(parameter+'='+quote(value))))
-                self.request.META['QUERY_STRING']=str(parameter)+'='+"{0}://{1}".format(self.request.scheme, self.request.get_host())
+                self.request.META['QUERY_STRING']=str(parameter)+'='+str(encoding.UrlEncode(value))
                 return True
         return False
     
