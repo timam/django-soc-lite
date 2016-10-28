@@ -59,4 +59,4 @@ class ThreatSecureHeaderMiddleware(object):
             if self.xss_filter and not 'x-xss-protection' in response:
                response["x-xss-protection"] = "1; mode=block"
 
-        return response
+            return response

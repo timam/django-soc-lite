@@ -1,0 +1,8 @@
+SQL -> SQL Injection 
+XSS -> Cross site scripting 
+RCE -> Remote code execution 
+CSRF -> Cross site request forgery 
+ID -> Information Disclosure 
+LFI -> Local file inclusion 
+RFE -> Remote file execution 
+DT -> Directory traversal
