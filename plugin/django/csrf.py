@@ -1,56 +1,30 @@
-from __future__ import absolute_import, division, print_function
+from plugin.django.middleware import *
+from django.template import RequestContext,Template,loader
 
-from plugin import client_id, port, server
-from plugin.info import send_client_info
-
-
-import requests
-import md5
-import re
-
-from datetime import datetime
-
-def _make_token(session_id):
-    return md5.new(settings.SECRET_KEY + session_id).hexdigest()
+def logger(req):
+    #logging.info(log(event= "csrf attempt", url= self.request.path, stacktrace= traceback.format_stack(), query_string= str(parameter+'='+quote(value))))
+    pass
     
-def detected(request):
-    url = "http://{0}:{1}/log/new".format(server, port)
-    requests.post(url, data={
-        "client_id": client_id,
-        "timestamp": datetime.utcnow(),
-        "data": json.dumps({
-            "event": "CSRF attempt",
-            "stacktrace": traceback.format_stack(),
-            "url": self.request.path,
-            "query_string": query,
-        })
-    })
+    
 
-    send_client_info()
+class CSRFMiddleware(object):
+    def __init__(self, request):
+        self.request = request
 
+    def check_csrf(self):
+        if self.request.method == 'POST':
+            import django
+            print(self.request.META['CSRF_COOKIE']) 
+            session_id = django.middleware.csrf.get_token(self.request)
+            request_cookie = self.request.POST.get('csrfmiddlewaretoken') 
+            print(session_id, request_cookie)
+            if request_cookie is None:
+                logger(self.request)
+                return True
+            return False
 
-class CsrfResponseMiddleware(object):
-        def process_request(self, request):
-        if request.POST:
-            try:
-                session_id = request.COOKIES[settings.SESSION_COOKIE_NAME]
-            except KeyError:
-                # No session, no check required
-                return 'rejected'
-            csrf_token = _make_token(session_id)
-            # check incoming token
-            try:
-                request_csrf_token = request.POST['csrfmiddlewaretoken']
-            except KeyError:
-                detected(request)
-                return 'rejected'
-            
-            if request_csrf_token != csrf_token:
-                detected(request)
-                return 'rejected'
-                
-        return 'rejected'
+        return False
 
 
 
-        
+             
