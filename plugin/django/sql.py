@@ -1,10 +1,12 @@
 from plugin.django.middleware import *
 import bleach
-
 from plugin import url_coder, rule_checker, HTML_Escape
+import logging
+from plugin.django.logger import log
+def send_log(request, query):
+    logging.info(log(event= "sql injection attempt", url= request.path, stacktrace= traceback.format_stack(), query_string = str(query)))
 
-def checker(q):
-    #logging.info(log(event= "XSS attempt", url= self.request.path, stacktrace= traceback.format_stack(), query_string= str(parameter+'='+quote(value))))
+def purifier(q):
     q = bleach.clean(q)
     if not isinstance(q, str):
         q = q.encode("utf-8")
@@ -30,8 +32,9 @@ class SQLMiddleware(object):
             parameter = list[0]
             value = dict[parameter]
             value = url_coder.decoder(str(value))                          #decoding/double/decoding
-            if rule_checker.sql_filter(str(value)):                  #check attack 
-                q = checker(value)
+            if rule_checker.sql_filter(str(value)):                        #check attack 
+                send_log(self.request,query)
+                q = purifier(value)
                 q = rule_checker.sql_replace(q) 
                 self.request.META['QUERY_STRING']=str(parameter+'='+q)
         return
@@ -43,11 +46,11 @@ class SQLMiddleware(object):
             return
         for i in range(len(l)):
             par = l[i] 
-            value = self.request.POST.get(par).lower()
-            value = url_coder.decoder(str(value))
-            if rule_checker.sql_filter(str(value)): 
-                value = checker(value)
-                #print('sql')
+            org_value = self.request.POST.get(par).lower() 
+            value = url_coder.decoder(str(org_value))
+            if rule_checker.sql_filter(str(value)):
+                send_log(self.request, str(par+'='+org_value)) 
+                value = purifier(value)
                 q = rule_checker.sql_replace(value) 
                 self.request.POST.update({ par: q}) 
             

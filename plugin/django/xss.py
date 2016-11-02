@@ -1,7 +1,11 @@
 from plugin.django.middleware import *
 import bleach
-
 from plugin import url_coder, rule_checker, HTML_Escape
+import logging
+from plugin.django.logger import log
+def send_log(request, query):
+    logging.info(log(event= "XSS attempt", url= request.path, stacktrace= traceback.format_stack(), query_string= str(query)))
+    #print(str(query))
 
 class XSSMiddleware(object):
     def __init__(self, request):
@@ -18,10 +22,11 @@ class XSSMiddleware(object):
             dict = q.dict()
             list = [k for k in dict]
             parameter = list[0]
-            value = dict[parameter]
-            value = url_coder.decoder(str(value))                    #decoding/double/decoding
+            org_value = dict[parameter]
+            value = url_coder.decoder(str(org_value))                    #decoding/double/decoding
             if rule_checker.xss_filter(str(value)):                  #check attack 
-                #logging.info(log(event= "XSS attempt", url= self.request.path, stacktrace= traceback.format_stack(), query_string= str(parameter+'='+quote(value))))
+                #print('don')
+                send_log(self.request, query)
                 q = bleach.clean(value)
                 if not isinstance(q, str):
                     q = q.encode("utf-8")
@@ -35,9 +40,10 @@ class XSSMiddleware(object):
             try:
                 path = self.request.path
                 import os.path                                    
-                value = os.path.split(path)[1]                         #last value from path
-                value = url_coder.decoder(str(value))                   #decoding/double/decoding
+                org_value = os.path.split(path)[1]                         #last value from path
+                value = url_coder.decoder(str(org_value))                   #decoding/double/decoding
                 if rule_checker.xss_filter(str(value)):                #check attack
+                    send_log(self.request, org_value)
                     q = bleach.clean(value)
                     if not isinstance(q, str):
                         q = q.encode("utf-8")
@@ -54,8 +60,10 @@ class XSSMiddleware(object):
             return
         for i in range(len(l)):
             par = l[i] 
-            value = self.request.POST.get(par)
+            org_value = self.request.POST.get(par)
+            value = url_coder.decoder(str(org_value))
             if rule_checker.xss_filter(str(value)): 
+                send_log(self.request, str(par+'='+org_value)) 
                 q = bleach.clean(value)
                 if not isinstance(q, str):
                     q = q.encode("utf-8")

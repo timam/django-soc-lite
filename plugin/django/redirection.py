@@ -1,11 +1,10 @@
 from plugin.django.middleware import *
-from django.template import RequestContext,Template,loader
-from django.http import HttpResponse
 from plugin import url_coder
-
-def logger(q):
-    #logging.info(log(event= "XSS attempt", url= self.request.path, stacktrace= traceback.format_stack(), query_string= str(parameter+'='+quote(value))))
-    pass
+import logging
+from plugin.django.logger import log
+def send_log(request, query):
+    logging.info(log(event= "unvalidate redirection attempt", url= request.path, stacktrace= traceback.format_stack(), query_string= str(query)))
+    #print(str(query))
     
     
 
@@ -21,7 +20,7 @@ class RedirectionMiddleware(object):
                 dict = q.dict()
                 list = [k for k in dict]
                 parameter = list[0]
-                p_list = ['url','next','action']
+                p_list = ['url','next']
                 if parameter in p_list:
                     value = dict[parameter]
                     value = url_coder.decoder(str(value))
@@ -31,7 +30,7 @@ class RedirectionMiddleware(object):
                         host_whitelist = ('',)
                     if value in host_whitelist:
                         return False
-                    logger(str(query)) 
+                    send_log(self.request, query)
                     return True
             return None
         return None

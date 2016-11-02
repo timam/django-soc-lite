@@ -3,7 +3,6 @@ from __future__ import absolute_import, division, print_function
 import json
 import re
 import requests
-import logging
 import traceback
 from django.conf import settings
 #from plugin.info import send_client_info
@@ -12,7 +11,6 @@ try:
     from urllib.parse import quote
 except ImportError:
     from urllib import quote 
-from plugin.django.logger import log
 from plugin.verify import Client_Verify
 from plugin.django import error_page
 class ThreatEquationMiddleware(object):

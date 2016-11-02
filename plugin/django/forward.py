@@ -3,11 +3,11 @@ from django.template import RequestContext,Template,loader
 from django.http import HttpResponse
 from plugin import url_coder
 
-def logger(q):
-    #logging.info(log(event= "XSS attempt", url= self.request.path, stacktrace= traceback.format_stack(), query_string= str(parameter+'='+quote(value))))
-    pass
-    
-    
+import logging
+from plugin.django.logger import log
+def send_log(request, query):
+    logging.info(log(event= "unvalidate forward attempt", url= request.path, stacktrace= traceback.format_stack(), query_string= str(query)))
+    #print(str(query))    
 
 class FWDMiddleware(object):
     def __init__(self, request):
@@ -16,13 +16,14 @@ class FWDMiddleware(object):
     def get_method(self):
         if self.request.method == 'GET':
             query = self.request.META.get('QUERY_STRING')
+            query = url_coder.decoder(str(query))        
             if query:
                 q = QueryDict(query)
                 dict = q.dict()
                 list = [k for k in dict]
                 parameter = list[0]
-                if parameter=='fwd' or parameter=='forward' :                  #check attack 
-                  logger(str(query)) 
+                if parameter=='fwd' or parameter=='action' :                  #check attack 
+                  send_log(self.request,query)
                   return True
             return None
         return None
