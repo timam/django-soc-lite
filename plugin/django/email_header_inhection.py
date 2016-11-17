@@ -27,15 +27,4 @@ class ThreatEquationMiddleware(object):
 
       
        def EmailHeaderInjection(self):    
-        if xss_strict.search(self.query):
-            url = "http://127.0.0.1:8000/log/new".format(server, port)
-            requests.post(url, data={
-                "client_id": client_id,
-                "timestamp": datetime.utcnow(),
-                "data": json.dumps({
-                    "event": "XSS attempt",
-                    "url": self.request.path,
-                    "stacktrace": traceback.format_stack(),
-                    "query_string": query,
-                })
-            })
+           pass

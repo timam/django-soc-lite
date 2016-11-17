@@ -1,11 +1,10 @@
 from plugin.django.middleware import *
 import bleach
 from plugin import url_coder, rule_checker, HTML_Escape
-import logging
-from plugin.django.logger import log
+from plugin.django.log_generator import send
 def send_log(request, query):
-    logging.info(log(event= "format string attempt", url= request.path, stacktrace= traceback.format_stack(), query_string= str(query)))
-    #print(str(query))
+    send(request, "FS", str(query), traceback.format_stack(), request.path)
+
 
 class FSMiddleware(object):
     def __init__(self, request):

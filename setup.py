@@ -10,11 +10,15 @@ setup(
         "shellescape",
         "click",
         "requests",
-        "bleach"
+        "bleach",
     ],
+    maintainer='greenhirok',
+    url = "",
     author = "",
     author_email = "",
-    packages=find_packages(exclude=["tests*"]),
+    packages=find_packages(),
+    package_data={'plugin': ['rules.json']},
+    include_package_data=True,
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Web Environment",
@@ -34,5 +38,5 @@ setup(
     entry_points="""
         [console_scripts]
         configure_plugin=plugin.configure:cli
-    """
+        """
 )

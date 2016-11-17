@@ -1,11 +1,8 @@
 from plugin.django.middleware import *
 from plugin import url_coder
-import logging
-from plugin.django.logger import log
+from plugin.django.log_generator import send
 def send_log(request, query):
-    logging.info(log(event= "unvalidate redirection attempt", url= request.path, stacktrace= traceback.format_stack(), query_string= str(query)))
-    #print(str(query))
-    
+    send(request, "UR", str(query), traceback.format_stack(), request.path)
     
 
 class RedirectionMiddleware(object):

@@ -1,9 +1,26 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+location = os.path.expanduser("~")
+try:
+    filename = os.path.join(location, 'threat.ini')
+    with open(filename, "r") as ins:
+        array = []
+        for line in ins:
+            line = line.rstrip('\n').rstrip('\r') 
+            array.append(line) 
+    for i in range(len(array)):
+        array[i] = array[i].replace(" ", "")
+        array[i] = array[i].split("=")
 
-client_id = "1a8ccb91-7b1f-47ac-8a26-b84106f10037"
-django_server = 'http://ec2-54-201-122-192.us-west-2.compute.amazonaws.com:9999/log/new'
-flask_server = 'http://flask-log.wmp6hzayvk.us-west-2.elasticbeanstalk.com/log/new'
+    client_id = array[0][1]
+    secret = array[1][1]    
+except IOError as exc:
+    client_id = 'n/a'
+    secret = 'n/a'
+
+plugin_name = 'ThreatequationPythonCore v0.0.1'
+django_server = 'http://api.threatequation.com/log/new'
+verify_url = 'http://api.threatequation.com/verify'
 server = ''
 port = None

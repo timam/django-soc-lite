@@ -1,8 +1,10 @@
-SQL -> SQL Injection 
-XSS -> Cross site scripting 
-RCE -> Remote code execution 
+SQLI -> SQL Injection 
+XSS -> Cross site scripting  
 CSRF -> Cross site request forgery 
 ID -> Information Disclosure 
+FS -> Format String
 LFI -> Local file inclusion 
 RFE -> Remote file execution 
 DT -> Directory traversal
+UF -> unvalidate froward
+UR -> unvalidate redirect

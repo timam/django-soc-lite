@@ -11,15 +11,16 @@ try:
     from urllib.parse import quote
 except ImportError:
     from urllib import quote 
-from plugin.verify import Client_Verify
+from plugin.verify import check
 from plugin.django import error_page
 class ThreatEquationMiddleware(object):
     #@add_hooks
     #@hook_templates
     def process_request(self, request):
-        import os
-        v = Client_Verify(os)
-        #print(v.check())
+        if check():
+            pass
+        else:
+            return
         self.request = request
         
         from plugin.django.xss import XSSMiddleware
@@ -40,6 +41,10 @@ class ThreatEquationMiddleware(object):
          
         
     def process_response(self, request, response):
+        if check():
+            pass
+        else:
+            return response
         from plugin.django.csrf import CSRFMiddleware
         csrf = CSRFMiddleware(request)
         if csrf.check_csrf():

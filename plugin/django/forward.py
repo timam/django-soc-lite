@@ -3,11 +3,9 @@ from django.template import RequestContext,Template,loader
 from django.http import HttpResponse
 from plugin import url_coder
 
-import logging
-from plugin.django.logger import log
+from plugin.django.log_generator import send
 def send_log(request, query):
-    logging.info(log(event= "unvalidate forward attempt", url= request.path, stacktrace= traceback.format_stack(), query_string= str(query)))
-    #print(str(query))    
+    send(request, "UF", str(query), traceback.format_stack(), request.path)
 
 class FWDMiddleware(object):
     def __init__(self, request):
