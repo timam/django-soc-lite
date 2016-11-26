@@ -17,7 +17,7 @@ class RedirectionMiddleware(object):
                 dict = q.dict()
                 list = [k for k in dict]
                 parameter = list[0]
-                p_list = ['url','next']
+                p_list = ['url','next','redirect']
                 if parameter in p_list:
                     value = dict[parameter]
                     value = url_coder.decoder(str(value))

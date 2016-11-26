@@ -18,7 +18,7 @@ IP_LIST = (
 )
 
 
-def send(request, event, queryString, stacktrace, url, risk='n'):
+def send(request, event, queryString, stacktrace, url, risk='high'):
     userAgent = request.META['HTTP_USER_AGENT']
     for i in IP_LIST:
         if request.META.get(str(i)):

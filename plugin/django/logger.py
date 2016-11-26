@@ -7,9 +7,9 @@ class StructuredMessage(object):
     def __init__(self, **kwargs):
         self.kwargs = kwargs
         #print(type(self.kwargs),self.kwargs)
-        #print(type(json.dumps(self.kwargs)),json.dumps(self.kwargs))
+        print(type(json.dumps(self.kwargs)),json.dumps(self.kwargs))
         #print(type(json.dumps(json.dumps(self.kwargs))),json.dumps(json.dumps(self.kwargs))) 
-        r = requests.post(django_server, headers={'Content-Type': 'application/json'}, data=json.dumps(self.kwargs))
+        r = requests.post(django_server, headers={'Content-Type': 'application/json'}, json={"data":self.kwargs})
         #print(r.text)
         
     def __str__(self):

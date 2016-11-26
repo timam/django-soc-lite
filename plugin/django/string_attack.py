@@ -3,7 +3,7 @@ import bleach
 from plugin import url_coder, rule_checker, HTML_Escape
 from plugin.django.log_generator import send
 def send_log(request, query):
-    send(request, "FS", str(query), traceback.format_stack(), request.path)
+    send(request, "FS", str(query), traceback.format_stack(), request.path,'medium')
 
 
 class FSMiddleware(object):
