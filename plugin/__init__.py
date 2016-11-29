@@ -20,7 +20,7 @@ except IOError as exc:
     secret = 'n/a'
 
 plugin_name = 'ThreatequationPythonDjango v0.0.1'
-django_server = 'http://testapi.threatequation.com/'
+django_server = 'https://api.threatequation.com/'
 verify_url = 'http://api.threatequation.com/verify'
 server = ''
 port = None

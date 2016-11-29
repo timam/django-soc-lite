@@ -29,8 +29,13 @@ def send(request, event, queryString, stacktrace, url, risk='high'):
         pass
     else:
        ip = 'unknown'
-    internal_data = {'event':event,'queryString':queryString,'risk':risk,'url':url,'stacktrace':stacktrace}
-    logging.info(log(clientId=client_id, ip=ip, userAgent=userAgent, timestamp=str(datetime.utcnow()),ApplicationName=plugin_name, data=internal_data))
+    import sys
+    import django
+    from django.db import connection
+    db_name = connection.vendor
+    version = {'python':sys.version,'django':django.get_version(),'database':db_name}
+    internal_data = {'method':request.method,'event':event,'queryString':queryString,'risk':risk,'url':url,'stacktrace':stacktrace}
+    logging.info(log(clientId=client_id, ip=ip, userAgent=userAgent, timestamp=str(datetime.utcnow()),ApplicationName=plugin_name, data=internal_data,backend=version))
     
     
 
