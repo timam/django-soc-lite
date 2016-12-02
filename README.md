@@ -1,3 +1,7 @@
+Version
+=================
+##v0.0.1
+
 Installing
 =================
 Download `python_plugin.tar.gz` file from dashboard
