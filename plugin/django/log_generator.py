@@ -33,7 +33,9 @@ def send(request, event, queryString, stacktrace, url, risk='high'):
     import django
     from django.db import connection
     db_name = connection.vendor
-    version = {'python':sys.version,'django':django.get_version(),'database':db_name}
+    agent = 'Django'+' : '+django.get_version()
+    core = 'Python'+' : '+'{0[0]}.{0[1]}.{0[2]}'.format(sys.version_info)
+    version = {'core':core,'agent':agent,'database':db_name}
     internal_data = {'method':request.method,'event':event,'queryString':queryString,'risk':risk,'url':url,'stacktrace':stacktrace}
     logging.info(log(clientId=client_id, ip=ip, userAgent=userAgent, timestamp=str(datetime.utcnow()),ApplicationName=plugin_name, data=internal_data,backend=version))
     
