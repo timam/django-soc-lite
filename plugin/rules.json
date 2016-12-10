@@ -730,6 +730,17 @@
           ]
         },
         "impact":"4"
+      },
+      {
+        "id":"79",
+        "rule":"(\\s*(and|or|xor|&&|\\|\\|)\\s*('|[0-9]|`?[a-z\\._-]+`?\\s*=|[a-z]+\\s*\\())|(like\\s+?[^\\s])",
+        "description":"detects basic sql attack",
+        "tags":{
+          "tag":[
+            "sqli"
+          ]
+        },
+        "impact":"7"
       }
     ]
 
