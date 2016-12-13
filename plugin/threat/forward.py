@@ -1,4 +1,4 @@
-from plugin.django.middleware import *
+from plugin.threat.middleware import *
 from django.template import RequestContext,Template,loader
 from django.http import HttpResponse
 from plugin import url_coder

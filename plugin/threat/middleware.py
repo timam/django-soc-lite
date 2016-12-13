@@ -12,7 +12,7 @@ try:
 except ImportError:
     from urllib import quote 
 from plugin.verify import check
-from plugin.django import error_page
+from plugin.threat import error_page
 class ThreatEquationMiddleware(object):
     #@add_hooks
     #@hook_templates
@@ -23,19 +23,19 @@ class ThreatEquationMiddleware(object):
             return
         self.request = request
         
-        from plugin.django.xss import XSSMiddleware
+        from plugin.threat.xss import XSSMiddleware
         XSSMiddleware(self.request)
-        from plugin.django.sql import SQLMiddleware
+        from plugin.threat.sql import SQLMiddleware
         SQLMiddleware(self.request)
-        from plugin.django.directory_traversal import DTMiddleware
+        from plugin.threat.directory_traversal import DTMiddleware
         DTMiddleware(self.request)
-        from plugin.django.info_disclosure import IDMiddleware
+        from plugin.threat.info_disclosure import IDMiddleware
         IDMiddleware(self.request)
-        from plugin.django.local_file_inclusion import LFIMiddleware
+        from plugin.threat.local_file_inclusion import LFIMiddleware
         LFIMiddleware(self.request)
-        from plugin.django.remote_file_execution import RFEMiddleware
+        from plugin.threat.remote_file_execution import RFEMiddleware
         RFEMiddleware(self.request)
-        from plugin.django.string_attack import FSMiddleware
+        from plugin.threat.string_attack import FSMiddleware
         FSMiddleware(self.request)
         
          
@@ -45,17 +45,17 @@ class ThreatEquationMiddleware(object):
             pass
         else:
             return response
-        from plugin.django.csrf import CSRFMiddleware
+        from plugin.threat.csrf import CSRFMiddleware
         csrf = CSRFMiddleware(request)
         if csrf.check_csrf():
             #from django.middleware.csrf import _get_failure_view
             return HttpResponse(error_page.page_403,status=403)
-        from plugin.django.redirection import RedirectionMiddleware
+        from plugin.threat.redirection import RedirectionMiddleware
         redirection = RedirectionMiddleware(request)
         if redirection.get_method():
             response['status_code']=302
             return HttpResponse(error_page.page_302,status=302)
-        from plugin.django.forward import FWDMiddleware
+        from plugin.threat.forward import FWDMiddleware
         forward = FWDMiddleware(request)
         #print(settings.MIDDLEWARE_CLASSES)
         #import django

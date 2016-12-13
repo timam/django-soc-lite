@@ -1,6 +1,6 @@
-from plugin.django.middleware import *
+from plugin.threat.middleware import *
 from plugin import url_coder
-from plugin.django.log_generator import send
+from plugin.threat.log_generator import send
 def send_log(request, query):
     send(request, "UR", str(query), traceback.format_stack(), request.path)
     

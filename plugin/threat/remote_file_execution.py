@@ -1,12 +1,11 @@
-from plugin.django.middleware import *
+from plugin.threat.middleware import *
 import bleach
 from plugin import url_coder, rule_checker, HTML_Escape
-from plugin.django.log_generator import send
+from plugin.threat.log_generator import send
 def send_log(request, query):
-    send(request, "FS", str(query), traceback.format_stack(), request.path,'medium')
+    send(request, "RFE", str(query), traceback.format_stack(), request.path)
 
-
-class FSMiddleware(object):
+class RFEMiddleware(object):
     def __init__(self, request):
         self.request = request
         if self.request.method == 'GET':
@@ -23,7 +22,7 @@ class FSMiddleware(object):
             parameter = list[0]
             value = dict[parameter]
             value = url_coder.decoder(str(value))                          #decoding/double/decoding
-            if rule_checker.format_string_filter(str(value)):                         #check attack 
+            if rule_checker.rfe_filter(str(value)):                         #check attack 
                 send_log(self.request, query)
                 q = bleach.clean(value)
                 
@@ -39,9 +38,9 @@ class FSMiddleware(object):
                 path = self.request.path
                 import os.path                                    
                 org_value = os.path.split(path)[1]                        #last value from path
-                value = url_coder.decoder(str(org_value))                   #decoding/double/decoding
-                if rule_checker.format_string_filter(str(value)):                #check attack
-                    send_log(self.request, str(org_value))
+                value = url_coder.decoder(str(org_value))                  #decoding/double/decoding
+                if rule_checker.rfe_filter(str(value)):                #check attack
+                    send_log(self.request, org_value)
                     q = bleach.clean(value)
                     if not isinstance(q, str):
                         q = q.encode("utf-8")
@@ -60,7 +59,7 @@ class FSMiddleware(object):
             par = l[i] 
             org_value = self.request.POST.get(par)
             value = url_coder.decoder(str(org_value))
-            if rule_checker.format_string_filter(str(value)): 
+            if rule_checker.rfe_filter(str(value)): 
                 send_log(self.request, str(par+'='+org_value))
                 q = bleach.clean(value)
                 if not isinstance(q, str):

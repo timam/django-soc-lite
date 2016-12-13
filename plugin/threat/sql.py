@@ -1,7 +1,7 @@
-from plugin.django.middleware import *
+from plugin.threat.middleware import *
 import bleach
 from plugin import url_coder, rule_checker, HTML_Escape
-from plugin.django.log_generator import send
+from plugin.threat.log_generator import send
 def send_log(request, query):
     send(request, "SQLI", str(query), traceback.format_stack(), request.path)
 
