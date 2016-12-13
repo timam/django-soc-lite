@@ -1,6 +1,6 @@
-from plugin.django.middleware import *
+from plugin.threat.middleware import *
 from django.template import RequestContext,Template,loader
-from plugin.django.log_generator import send
+from plugin.threat.log_generator import send
 def send_log(request, query):
     send(request, "CSRF", str(query), traceback.format_stack(), request.path)
         

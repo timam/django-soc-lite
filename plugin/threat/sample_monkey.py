@@ -21,10 +21,10 @@ def patch_all():
  
     #for cross site scirpting
     xss_module = __import__("xss")
-    from plugin.django.xss import requests
+    from plugin.threat.xss import requests
     patch_item(xss_module, "process_request", request)
     
     #for Sql injection
     sql_module=__import__("sql")
-    from plugin.django.sql import requests
+    from plugin.threat.sql import requests
     patch_item(sql_module, "process_request", request)

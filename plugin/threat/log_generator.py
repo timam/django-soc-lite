@@ -1,7 +1,7 @@
 import json
 import logging
 from datetime import datetime
-from plugin.django.logger import log
+from plugin.threat.logger import log
 from plugin import client_id, plugin_name
 
 IP_LIST = (

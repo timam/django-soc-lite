@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="plugin",
-    version="0.1.0",
+    version="0.0.2",
     description="A Powerfull Django plugin to detect and protect All Web-based Attack.",
     install_requires=[
         "shellescape",
@@ -12,13 +12,21 @@ setup(
         "requests",
         "bleach",
     ],
-    maintainer='greenhirok',
+    long_description=open('README.md').read(),
+    maintainer='threatequation',
     url = "",
     author = "",
     author_email = "",
     packages=find_packages(),
     package_data={'plugin': ['rules.json']},
     include_package_data=True,
+    """
+    tests_require=[
+        'django',
+        'dingus',
+    ],
+    """
+    test_suite='plugin.runtests.runtests',
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Web Environment",
