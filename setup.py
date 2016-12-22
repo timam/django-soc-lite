@@ -20,13 +20,6 @@ setup(
     packages=find_packages(),
     package_data={'plugin': ['rules.json']},
     include_package_data=True,
-    """
-    tests_require=[
-        'django',
-        'dingus',
-    ],
-    """
-    #test_suite = "plugin.runtests.runtests",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Web Environment",
