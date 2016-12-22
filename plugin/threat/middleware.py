@@ -70,12 +70,10 @@ class ThreatEquationMiddleware(object):
         # Don't set it if they used @xframe_options_exempt
         if getattr(response, 'xframe_options_exempt', False):
             return response  
-        response['X-Frame-Options'] = self.get_xframe_options_value(request,response)
+        response['X-Frame-Options'] = "DENY"
+        response['Server']="n/a"
         return response
 
-    def get_xframe_options_value(self, request, response):
-        return getattr(settings, 'X_FRAME_OPTIONS', 'SAMEORIGIN').upper()
-    
 
                        
        

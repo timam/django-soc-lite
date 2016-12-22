@@ -1,4 +1,4 @@
-from plugin.django.middleware import *
+from plugin.threat.middleware import *
 import bleach
 
 from plugin import url_coder, rule_checker, HTML_Escape
