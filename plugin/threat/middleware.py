@@ -6,11 +6,11 @@ import requests
 import traceback
 from django.conf import settings
 #from plugin.info import send_client_info
-from django.http import QueryDict, HttpResponse,HttpResponseRedirect
+from django.http import QueryDict, HttpResponse,HttpResponseRedirect,HttpRequest
 try:
     from urllib.parse import quote
 except ImportError:
-    from urllib import quote 
+    from urllib import quote
 from plugin.verify import check
 from plugin.threat import error_page
 class ThreatEquationMiddleware(object):
@@ -45,6 +45,14 @@ class ThreatEquationMiddleware(object):
             pass
         else:
             return response
+        if getattr(response, 'xframe_options_exempt', False):
+            pass  
+        else:
+            response['X-Frame-Options'] = "DENY"
+        response['Server']="n/a"
+        
+        from plugin.threat.debug_fix import Debug_Fix
+        Debug_Fix(self.request,response)  
         from plugin.threat.csrf import CSRFMiddleware
         csrf = CSRFMiddleware(request)
         if csrf.check_csrf():
@@ -65,13 +73,7 @@ class ThreatEquationMiddleware(object):
         if forward.get_method():
             response['status_code']=302
             return HttpResponse("<center><h1>302 Forward Error</h1><p>you are not authorized to see this page</p></center>",status=302)
-        if response.get('X-Frame-Options') is not None:
-            return response  
-        # Don't set it if they used @xframe_options_exempt
-        if getattr(response, 'xframe_options_exempt', False):
-            return response  
-        response['X-Frame-Options'] = "DENY"
-        response['Server']="n/a"
+        
         return response
 
 
