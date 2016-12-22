@@ -3,7 +3,7 @@ from django.template import RequestContext,Template,loader
 from django.http import HttpResponse
 from plugin import url_coder
 
-from plugin.django.log_generator import send
+from plugin.threat.log_generator import send
 def send_log(request, query):
     send(request, "UF", str(query), traceback.format_stack(), request.path)
 
