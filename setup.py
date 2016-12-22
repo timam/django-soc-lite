@@ -26,7 +26,7 @@ setup(
         'dingus',
     ],
     """
-    test_suite='plugin.runtests.runtests',
+    test_suite = "plugin.runtests.runtests",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Web Environment",
