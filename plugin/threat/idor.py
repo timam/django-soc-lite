@@ -1,17 +1,15 @@
 from plugin.threat.middleware import *
-import bleach
-from plugin import url_coder, rule_checker, HTML_Escape
+from plugin import url_coder
 from plugin.threat.log_generator import send
 def send_log(request, query):
-    send(request, "XSS", str(query), traceback.format_stack(), request.path)
+    send(request, "IDOR", str(query), traceback.format_stack(), request.path)
+    
 
-class XSSMiddleware(object):
+class IDORMiddleware(object):
     def __init__(self, request):
         self.request = request
         if self.request.method == 'GET':
             self.get_method()
-        if self.request.method == 'POST':
-            self.post_method()
 
     def get_method(self):
         query = self.request.META.get('QUERY_STRING')
@@ -50,24 +48,4 @@ class XSSMiddleware(object):
                 self.request.path_info = os.path.join(os.path.split(path)[0],q)            #update path
                 return True
             except:
-                return False  
-    def post_method(self):
-        self.request.POST = self.request.POST.copy()
-        l = [k for k in self.request.POST]
-        if not l:
-            return
-        for i in range(len(l)):
-            par = l[i] 
-            org_value = self.request.POST.get(par)
-            value = url_coder.decoder(str(org_value))
-            if rule_checker.xss_filter(str(value)): 
-                send_log(self.request, str(par+'='+org_value)) 
-                q = bleach.clean(value)
-                if not isinstance(q, str):
-                    q = q.encode("utf-8")
-                q = HTML_Escape.XSSEncode(q)
-                self.request.POST.update({ par: q}) 
-
-
-
-
+                return False 
