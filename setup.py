@@ -18,7 +18,7 @@ setup(
     author = "",
     author_email = "",
     packages=find_packages(),
-    package_data={'plugin': ['rules.json']},
+    package_data={'plugin': ['rules.json','library.txt']},
     include_package_data=True,
     test_suite="plugin.runtests.runtests",
     classifiers=[

@@ -9,13 +9,13 @@ def sql_replace(q):
             rules = item['rule']
             regex = re.compile(rules)
             if regex.search(q):
-                q = regex.sub('',q)
+                q = regex.sub('', q)
 
     return q
 
 def get_rule():
     BASE = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(BASE,'rules.json'),'r') as f:
+    with open(os.path.join(BASE, 'rules.json'), 'r') as f:
         data = json.load(f)
     return data  
 
