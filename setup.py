@@ -11,6 +11,7 @@ setup(
         "click",
         "requests",
         "bleach",
+        "safety",
     ],
     long_description=open('README.md').read(),
     maintainer='threatequation',

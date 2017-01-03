@@ -22,7 +22,8 @@ class ThreatEquationMiddleware(object):
         else:
             return
         self.request = request
-        
+        from plugin.library_check import system_check
+        system_check()
         from plugin.threat.xss import XSSMiddleware
         XSSMiddleware(self.request)
         from plugin.threat.sql import SQLMiddleware
@@ -52,7 +53,7 @@ class ThreatEquationMiddleware(object):
         response['Server']="n/a"
         
         from plugin.threat.debug_fix import Debug_Fix
-        Debug_Fix(self.request,response)  
+        #Debug_Fix(self.request,response)  
         from plugin.threat.csrf import CSRFMiddleware
         csrf = CSRFMiddleware(request)
         if csrf.check_csrf():

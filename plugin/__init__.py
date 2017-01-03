@@ -19,8 +19,9 @@ except IOError as exc:
     client_id = 'n/a'
     secret = 'n/a'
 
-plugin_name = 'ThreatequationPythonDjango v0.0.1'
+plugin_name = 'ThreatequationPythonDjango v0.0.3'
 django_server = 'https://api.threatequation.com/'
+system_log_server = 'https://api.threatequation.com/system/'
 verify_url = 'http://api.threatequation.com/verify'
 server = ''
 port = None
