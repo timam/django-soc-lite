@@ -22,8 +22,8 @@ class ThreatEquationMiddleware(object):
         else:
             return
         self.request = request
-        from plugin.library_check import system_check
-        system_check()
+        from plugin.library_check import library_check
+        library_check()
         from plugin.threat.xss import XSSMiddleware
         XSSMiddleware(self.request)
         from plugin.threat.sql import SQLMiddleware

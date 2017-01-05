@@ -16,7 +16,7 @@ class CSRFMiddleware(object):
             request_cookie = self.request.POST.get('csrfmiddlewaretoken') 
             #print(session_id, request_cookie)
             if request_cookie is None:
-                send_log(self.request)
+                send_log(self.request,'')
                 return True
             return False
 

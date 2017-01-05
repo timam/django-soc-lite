@@ -1,7 +1,7 @@
 import json
 import logging
 from datetime import datetime
-from plugin.threat.logger import log
+from plugin.logger import log
 from plugin import client_id, plugin_name
 
 IP_LIST = (
@@ -37,7 +37,7 @@ def send(request, event, queryString, stacktrace, url, risk='high'):
     core = 'Python'+' : '+'{0[0]}.{0[1]}.{0[2]}'.format(sys.version_info)
     version = {'core':core,'agent':agent,'database':db_name}
     internal_data = {'method':request.method,'event':event,'queryString':queryString,'risk':risk,'url':url,'stacktrace':stacktrace}
-    logging.info(log(clientId=client_id, ip=ip, userAgent=userAgent, timestamp=str(datetime.utcnow()),ApplicationName=plugin_name, data=internal_data,backend=version))
+    logging.info(log(name='attack',clientId=client_id, ip=ip, userAgent=userAgent, timestamp=str(datetime.utcnow()),ApplicationName=plugin_name, data=internal_data,backend=version))
     
     
 
