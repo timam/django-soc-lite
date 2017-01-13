@@ -26,7 +26,7 @@ def library_check():
             update_latest(package_list)
             from safety import safety
             result = safety.check(package_list)
-            data = {item.name:{'name':item.name,'current':item.version,'require':item.spec, 'data':item.data} for item in result}	
+            data = {item.name:{'name':item.name,'current':item.version,'require':item.spec, 'desription':item.data} for item in result}	
             import logging
             from plugin import client_id, plugin_name
             from datetime import datetime
