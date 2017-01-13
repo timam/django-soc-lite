@@ -38,10 +38,11 @@ def xss_filter(q):
             regex = re.compile(rules)
             if regex.search(q):
                 f = 1
+                description = item['description']
 
     if f == 0:
         return False
-    return True    
+    return True, description    
 
 def sql_filter(q):
     q = converter(q)
@@ -53,10 +54,10 @@ def sql_filter(q):
             regex = re.compile(rule)
             if regex.search(q):
                 f = 1
-            
+                description = item['description'] 
     if f == 0:
         return False
-    return True 
+    return True, description 
 
 def id_filter(q):
     q = converter(q)
@@ -68,10 +69,10 @@ def id_filter(q):
             regex = re.compile(rule)
             if regex.search(q):
                 f = 1
-            
+                description = item['description']
     if f == 0:
         return False
-    return True
+    return True, description
 
 def dt_filter(q):
     q = converter(q)
@@ -83,10 +84,10 @@ def dt_filter(q):
             regex = re.compile(rule)
             if regex.search(q):
                 f = 1
-            
+                description = item['description']
     if f == 0:
         return False
-    return True 
+    return True, description 
 
 def lfi_filter(q):
     q = converter(q)
@@ -98,10 +99,10 @@ def lfi_filter(q):
             regex = re.compile(rule)
             if regex.search(q):
                 f = 1
-            
+                description = item['description']
     if f == 0:
         return False
-    return True
+    return True, description
 
 def rfe_filter(q):
     q = converter(q)
@@ -113,10 +114,10 @@ def rfe_filter(q):
             regex = re.compile(rule)
             if regex.search(q):
                 f = 1
-            
+                description = item['description']
     if f == 0:
         return False
-    return True
+    return True, description
 
 
 
@@ -130,11 +131,13 @@ def format_string_filter(q):
             regex = re.compile(rule)
             if regex.search(q):
                 f = 1
+                description = item['description']
     if f == 0:
         return False
-    return True
+    return True, description
     
-#q = """O:3:%22foo%22:2:{s:4:%22file%22;s:9:%22shell.php%22;s:4:%22data%22;s:5:%22aaaa%22;}""" 
-#print(xss_filter(str(q)))
+#q = """</script><script>alert(1);</script><script>""" 
+#if xss_filter(q)[0]:
+#    print(xss_filter(q)[1])
 
   
