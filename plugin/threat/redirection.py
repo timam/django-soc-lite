@@ -2,7 +2,7 @@ from plugin.threat.middleware import *
 from plugin import url_coder
 from plugin.threat.log_generator import send
 def send_log(request, query):
-    send(request, "UR", str(query), traceback.format_stack(), request.path)
+    send(request, "UR", str(query), traceback.format_stack(), request.path, 'Host validation, Encoding and decoding', 'medium')
     
 
 class RedirectionMiddleware(object):

@@ -2,7 +2,7 @@ from plugin.threat.middleware import *
 from django.template import RequestContext,Template,loader
 from plugin.threat.log_generator import send
 def send_log(request, query):
-    send(request, "CSRF", str(query), traceback.format_stack(), request.path)
+    send(request, "CSRF", str(query), traceback.format_stack(), request.path, 'form verification, session+cookie check')
         
 class CSRFMiddleware(object):
     def __init__(self, request):

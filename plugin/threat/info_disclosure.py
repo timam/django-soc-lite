@@ -3,7 +3,7 @@ import bleach
 from plugin import url_coder, rule_checker, HTML_Escape
 from plugin.threat.log_generator import send
 def send_log(request, query):
-    send(request, "ID", str(query), traceback.format_stack(), request.path,'medium')
+    send(request, "ID", str(query), traceback.format_stack(), request.path, 'access verification and command checking')
 
 class IDMiddleware(object):
     def __init__(self, request):

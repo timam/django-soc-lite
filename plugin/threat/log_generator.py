@@ -18,7 +18,7 @@ IP_LIST = (
 )
 
 
-def send(request, event, queryString, stacktrace, url, risk='high', description='strong attack',impact='high risk',cwe='190'):
+def send(request, event, queryString, stacktrace, url, d_method='input validation' risk='high', description='strong attack',impact='high risk',cwe='190'):
     userAgent = request.META['HTTP_USER_AGENT']
     for i in IP_LIST:
         if request.META.get(str(i)):
@@ -37,7 +37,7 @@ def send(request, event, queryString, stacktrace, url, risk='high', description=
     core = 'Python'+' : '+'{0[0]}.{0[1]}.{0[2]}'.format(sys.version_info)
     version = {'core':core,'agent':agent,'database':db_name}
     internal_data = {'decription':description, 'impact':impact, 'cwe':cwe, 'method':request.method, 'event':event, 'queryString':queryString, 'risk':risk,'url':url, 'stacktrace':stacktrace}
-    logging.info(log(name='attack',clientId=client_id, ip=ip, userAgent=userAgent, timestamp=str(datetime.utcnow()),ApplicationName=plugin_name, data=internal_data,backend=version))
+    logging.info(log(name='attack',clientId=client_id, ip=ip, userAgent=userAgent, timestamp=str(datetime.utcnow()),ApplicationName=plugin_name, data=internal_data,backend=version,defence_method=d_method))
     
     
 

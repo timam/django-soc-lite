@@ -4,7 +4,7 @@ import bleach
 from plugin import url_coder, rule_checker, HTML_Escape
 from plugin.threat.log_generator import send
 def send_log(request, query):
-    send(request, "DT", str(query), traceback.format_stack(), request.path)
+    send(request, "DT", str(query), traceback.format_stack(), request.path, 'encoding, Insecure Path detection')
 
 class DTMiddleware(object):
     def __init__(self, request):
