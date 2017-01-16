@@ -26,14 +26,15 @@ def library_check():
             update_latest(package_list)
             from safety import safety
             result = safety.check(package_list)
-            data = {item.name:{'name':item.name,'current':item.version,'require':item.spec, 'desription':item.data} for item in result}	
+            data = {item.name:{'name':item.name,'current':item.version,'require':item.spec, 'description':item.data} for i,item in zip(range(len(result)),result)}	
             import logging
             from plugin import client_id, plugin_name
             from datetime import datetime
             from plugin.logger import log	    
             logging.info(log(name='library',clientId=client_id, timestamp=str(datetime.utcnow()),ApplicationName=plugin_name, data=data))
-            #print(data)
+            print(data)
         else:
             pass
     else:
         pass	    
+

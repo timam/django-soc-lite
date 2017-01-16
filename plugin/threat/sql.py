@@ -2,8 +2,8 @@ from plugin.threat.middleware import *
 import bleach
 from plugin import url_coder, rule_checker, HTML_Escape
 from plugin.threat.log_generator import send
-def send_log(request, query):
-    send(request, "SQLI", str(query), traceback.format_stack(), request.path, 'escaping, encoding, white/black list verification')
+def send_log(request, query, description):
+    send(request, "SQLI", str(query), traceback.format_stack(), request.path, 'escaping, encoding, white/black list verification', description)
 
 
 def purifier(q):
@@ -33,7 +33,7 @@ class SQLMiddleware(object):
             value = dict[parameter]
             value = url_coder.decoder(str(value))                          #decoding/double/decoding
             if rule_checker.sql_filter(str(value)):                        #check attack 
-                send_log(self.request,query)
+                send_log(self.request,query,rule_checker.sql_filter(str(value))[1])
                 q = purifier(value)
                 q = rule_checker.sql_replace(q) 
                 self.request.META['QUERY_STRING']=str(parameter+'='+q)
@@ -49,7 +49,7 @@ class SQLMiddleware(object):
             org_value = self.request.POST.get(par).lower() 
             value = url_coder.decoder(str(org_value))
             if rule_checker.sql_filter(str(value)):
-                send_log(self.request, str(par+'='+org_value)) 
+                send_log(self.request, str(par+'='+org_value),rule_checker.sql_filter(str(value))[1]) 
                 value = purifier(value)
                 q = rule_checker.sql_replace(value) 
                 self.request.POST.update({ par: q}) 

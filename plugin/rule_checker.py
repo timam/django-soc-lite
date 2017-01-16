@@ -137,7 +137,7 @@ def format_string_filter(q):
     return True, description
     
 #q = """</script><script>alert(1);</script><script>""" 
-#if xss_filter(q)[0]:
+#if xss_filter(q):
 #    print(xss_filter(q)[1])
 
   
