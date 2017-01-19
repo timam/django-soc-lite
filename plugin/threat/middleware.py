@@ -53,7 +53,7 @@ class ThreatEquationMiddleware(object):
         response['Server']="n/a"
         
         from plugin.threat.debug_fix import Debug_Fix
-        #Debug_Fix(self.request,response)  
+        Debug_Fix(self.request,response)  
         from plugin.threat.csrf import CSRFMiddleware
         csrf = CSRFMiddleware(request)
         if csrf.check_csrf():
