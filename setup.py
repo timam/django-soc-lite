@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="plugin",
-    version="0.0.3",
+    version="0.0.4",
     description="A Powerfull Django plugin to detect and protect All Web-based Attack.",
     install_requires=[
         "shellescape",
@@ -35,7 +35,7 @@ setup(
         "Programming Language :: Python :: 3.2",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.5+",
         "Framework :: Django",
     ],
     entry_points="""
