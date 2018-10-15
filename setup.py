@@ -3,15 +3,14 @@ from __future__ import absolute_import, division, print_function
 from setuptools import find_packages, setup
 
 setup(
-    name="plugin",
-    version="0.0.4",
-    description="A Powerfull Django plugin to detect and protect All Web-based Attack.",
+    name="django-soc-lite",
+    version="0.0.5",
+    description="A Powerfull Django plugin to detect and logging Basic Web-based Attack.",
     install_requires=[
-        "shellescape",
-        "click",
-        "requests",
-        "bleach",
-        "safety",
+        "click==6.6",
+        "requests==2.11.1",
+        "requests-cache==0.4.13",
+        'shellescape==3.4.1'
     ],
     long_description=open('README.md').read(),
     maintainer='threatequation',
@@ -19,9 +18,9 @@ setup(
     author = "",
     author_email = "",
     packages=find_packages(),
-    package_data={'plugin': ['rules.json','library.txt']},
+    package_data={'django_soc_lite': ['rules.json',]},
     include_package_data=True,
-    test_suite="plugin.runtests.runtests",
+    test_suite="django_soc_lite.runtests.runtests",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Web Environment",
@@ -38,8 +37,4 @@ setup(
         "Programming Language :: Python :: 3.5+",
         "Framework :: Django",
     ],
-    entry_points="""
-        [console_scripts]
-        configure_plugin=plugin.configure:cli
-        """
 )
