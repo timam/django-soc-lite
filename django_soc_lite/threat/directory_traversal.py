@@ -1,10 +1,10 @@
-from plugin.threat.middleware import *
+from ..threat.middleware import *
 import bleach
 
-from plugin import url_coder, rule_checker, HTML_Escape
-from plugin.threat.log_generator import send
+from .. import url_coder, rule_checker, HTML_Escape
+from ..threat.log_generator import send
 def send_log(request, query):
-    send(request, "DT", str(query), traceback.format_stack(), request.path, 'encoding, Insecure Path detection')
+    send(request, "DT", str(query), request.path, 'encoding, Insecure Path detection')
 
 class DTMiddleware(object):
     def __init__(self, request):
@@ -66,8 +66,4 @@ class DTMiddleware(object):
                 if not isinstance(q, str):
                     q = q.encode("utf-8")
                 q = HTML_Escape.CommandEscape(q)
-                self.request.POST.update({ par: q}) 
-
-
-
-
+                self.request.POST.update({ par: q})

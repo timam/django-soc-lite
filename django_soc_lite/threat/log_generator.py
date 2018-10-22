@@ -1,8 +1,8 @@
 import json
 import logging
 from datetime import datetime
-from plugin.logger import log
-from plugin import client_id, plugin_name
+from ..logger import log
+from .. import client_id, plugin_name
 
 IP_LIST = (
     'HTTP_CF_CONNECTING_IP',
@@ -18,7 +18,7 @@ IP_LIST = (
 )
 
 
-def send(request, event, queryString, stacktrace, url, d_method='input validation',description='strong attack', risk='high', impact='high risk', cwe='190'):
+def send(request, event, queryString, url, d_method='input validation',description='strong attack', risk='high', impact='high risk', cwe='190'):
     userAgent = request.META['HTTP_USER_AGENT']
     for i in IP_LIST:
         if request.META.get(str(i)):

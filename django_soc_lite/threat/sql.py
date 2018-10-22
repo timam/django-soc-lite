@@ -1,9 +1,10 @@
-from plugin.threat.middleware import *
+from ..threat.middleware import *
 import bleach
-from plugin import url_coder, rule_checker, HTML_Escape
-from plugin.threat.log_generator import send
+from .. import url_coder, rule_checker, HTML_Escape
+from ..threat.log_generator import send
+
 def send_log(request, query, description):
-    send(request, "SQLI", str(query), traceback.format_stack(), request.path, 'escaping, encoding, white/black list verification', description)
+    send(request, "SQLI", str(query), request.path, 'escaping, encoding, white/black list verification', description)
 
 
 def purifier(q):
@@ -52,8 +53,4 @@ class SQLMiddleware(object):
                 send_log(self.request, str(par+'='+org_value),rule_checker.sql_filter(str(value))[1]) 
                 value = purifier(value)
                 q = rule_checker.sql_replace(value) 
-                self.request.POST.update({ par: q}) 
-            
-
-
-
+                self.request.POST.update({ par: q})

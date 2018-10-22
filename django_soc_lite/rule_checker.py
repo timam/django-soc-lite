@@ -2,89 +2,77 @@ import os.path
 import json
 import re
 
-def sql_replace(q):
+def sql_replace(query):
+    """custom method for match and replace some vulnerable sql characters"""
     for item in get_rule():
         tag = item['tags']['tag'][0]
         if  tag == 'sqli':
             rules = item['rule']
             regex = re.compile(rules)
-            if regex.search(q):
-                q = regex.sub('', q)
-
-    return q
+            if regex.search(query):
+                query = regex.sub('', query)
+    return query
 
 def get_rule():
-    BASE = os.path.dirname(os.path.abspath(__file__))
-    with open(os.path.join(BASE, 'rules.json'), 'r') as f:
-        data = json.load(f)
-    return data  
+    """load rules pattern from rules.json"""
+    base = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(base, 'rules.json'), 'r') as rule_data:
+        data = json.load(rule_data)
+    return data
 
-def converter(q):
+def converter(query):
+    """method for decoding urls <query>:<str>"""
     try:
-        from plugin import url_coder  
+        from .. import url_coder
     except ImportError:
         import url_coder
-    q = url_coder.decoder(str(q))
-    return q
+    query = url_coder.decoder(str(query))
+    return query
 
-
-def xss_filter(q):
-    q = converter(q)
-    f = 0
+def xss_filter(query):
+    """checking input with xss rules"""
+    query = converter(query)
+    flag = 0
     for item in get_rule():
         tag = item['tags']['tag'][0]
         if  tag == 'xss' or tag == 'dos':
             rules = item['rule']
             regex = re.compile(rules)
-            if regex.search(q):
-                f = 1
+            if regex.search(query):
+                flag = 1
                 description = item['description']
-
-    if f == 0:
+    if flag == 0:
         return False
-    return True, description    
+    return True, description
 
-def sql_filter(q):
-    q = converter(q)
-    f = 0
+def sql_filter(query):
+    """checking input with sqli rules"""
+    query = converter(query)
+    flag = 0
     for item in get_rule():
         tag = item['tags']['tag'][0]
         if  tag == 'sqli':
             rule = item['rule']
             regex = re.compile(rule)
-            if regex.search(q):
-                f = 1
-                description = item['description'] 
-    if f == 0:
-        return False
-    return True, description 
-
-def id_filter(q):
-    q = converter(q)
-    f = 0
-    for item in get_rule():
-        tag = item['tags']['tag'][0]
-        if  tag == 'id':
-            rule = item['rule']
-            regex = re.compile(rule)
-            if regex.search(q):
-                f = 1
+            if regex.search(query):
+                flag = 1
                 description = item['description']
-    if f == 0:
+    if flag == 0:
         return False
     return True, description
 
-def dt_filter(q):
-    q = converter(q)
-    f = 0
+def dt_filter(query):
+    """checking input with directory traversal rules"""
+    query = converter(query)
+    flag = 0
     for item in get_rule():
         tag = item['tags']['tag'][0]
         if  tag == 'dt' or tag == 'files':
             rule = item['rule']
             regex = re.compile(rule)
-            if regex.search(q):
-                f = 1
+            if regex.search(query):
+                flag = 1
                 description = item['description']
-    if f == 0:
+    if flag == 0:
         return False
-    return True, description 
+    return True, description

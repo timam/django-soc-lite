@@ -1,9 +1,9 @@
-from plugin.threat.middleware import *
+from ..threat.middleware import *
 import bleach
-from plugin import url_coder, rule_checker, HTML_Escape
-from plugin.threat.log_generator import send
+from .. import url_coder, rule_checker, HTML_Escape
+from ..threat.log_generator import send
 def send_log(request, query, description):
-    send(request, "XSS", str(query), traceback.format_stack(), request.path, 'input validation and white+black list testing', description)
+    send(request, "XSS", str(query), request.path, 'input validation and white+black list testing', description)
 
 class XSSMiddleware(object):
     def __init__(self, request):
@@ -25,13 +25,7 @@ class XSSMiddleware(object):
             if rule_checker.xss_filter(str(value)):                      #check attack 
                 #print('don')
                 send_log(self.request, query,rule_checker.xss_filter(str(value))[1])
-                q = bleach.clean(value)
-                if not isinstance(q, str):
-                    q = q.encode("utf-8")
- 
-                q = HTML_Escape.XSSEncode(q)
-                #print(q)                    
-                self.request.META['QUERY_STRING']=str(parameter+'='+q)
+                
                 return True
             return False
         if not query:
@@ -66,4 +60,4 @@ class XSSMiddleware(object):
                 if not isinstance(q, str):
                     q = q.encode("utf-8")
                 q = HTML_Escape.XSSEncode(q)
-                self.request.POST.update({ par: q})
+                self.request.POST.update({ par: q}) 

@@ -1,7 +1,7 @@
 #python3 -m unittest tests.rule_test
 
 import unittest
-import rule_checker as R
+from .. import rule_checker as R
 
 
 xss_attack = """</script><script>alert(1);</script><script>"""

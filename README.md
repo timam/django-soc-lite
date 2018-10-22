@@ -3,9 +3,7 @@
 * A security middleware for Django app to Detect OWASP Top Basic and generate report in your dashboard
 
 
-##with ``pip``::
-
-    . Activate your project's `virtualenv`
+##with ``pip``:
     
     $ pip install django-soc-lite
 
@@ -20,17 +18,18 @@ Configure to Your APP
       ``'django_soc_lite.threat.middleware.ThreatEquationMiddleware',``
       
       
-Configure ``threat.ini`` (important)
+Include your Product_key and Api key (without this step, plugin will not work)
 ================= 
 
-    . Create ``threat.ini`` file in your Home directory.
-    .Ex:
-         In Apache the directory will be `/var/www/threat.ini`
-         In Ubuntu the directory will be `/home/<user>/threat.ini` 
-    
-    . Open `threat.ini` and update this file as below.
-         id = <your id_key>
-         secret = <your secret_key>
+    . in your `settings.py` file place your keys in anywhere.
+
+         THREAT_EQUATION_PRODUCT_KEY = <your product_id>
+         THREAT_EQUATION_API_KEY = <your api_key>
+
+    . example-
+
+         THREAT_EQUATION_PRODUCT_KEY = 'aaaaabbbbb'
+         THREAT_EQUATION_API_KEY = '1111111111999999999999xxxxxxxxxxxxxxxxx'
 
 
 ## Features ##

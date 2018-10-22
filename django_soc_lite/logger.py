@@ -1,22 +1,23 @@
+"""Bug fix log generator and api calling"""
 import json
 import logging
 import requests
-from plugin import port, django_server, library_log_server, system_log_server
+from .. import django_server
+#token headers will be added....
 
 class StructuredMessage(object):
+    """method for catch and generate log event"""
     def __init__(self, name, **kwargs):
         self.name = name
         self.kwargs = kwargs
-        print(type(self.kwargs),self.kwargs)
-        #print(type(json.dumps(self.kwargs)),json.dumps(self.kwargs))
         if self.name == 'attack':
-            requests.post(django_server, headers={'Content-Type': 'application/json'}, json={"data":self.kwargs})
-        if self.name == 'library':
-            requests.post(library_log_server, headers={'Content-Type': 'application/json'}, json={"data":self.kwargs})
-        #if self.name == 'system':
-            #requests.post(system_log_server, headers={'Content-Type': 'application/json'}, json={"data":self.kwargs})
+            r = requests.post(django_server, json=self.kwargs)
+        else:
+            pass
+        
     def __str__(self):
         return json.dumps(self.kwargs)
 
-log = StructuredMessage   # optional, to improve readability
+# optional, to improve readability
+log = StructuredMessage
 logging.basicConfig(level=logging.INFO, format='%(message)s')

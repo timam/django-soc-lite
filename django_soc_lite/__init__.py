@@ -2,27 +2,19 @@ from __future__ import absolute_import, division, print_function
 
 import os
 location = os.path.expanduser("~")
-try:
-    filename = os.path.join(location, 'threat.ini')
-    with open(filename, "r") as ins:
-        array = []
-        for line in ins:
-            line = line.rstrip('\n').rstrip('\r') 
-            array.append(line) 
-    for i in range(len(array)):
-        array[i] = array[i].replace(" ", "")
-        array[i] = array[i].split("=")
+from django.conf import settings
 
-    client_id = array[0][1]
-    secret = array[1][1]    
+try:
+    client_id = settings.THREAT_EQUATION_PRODUCT_KEY
+    secret = settings.THREAT_EQUATION_API_KEY    
 except IOError as exc:
     client_id = 'n/a'
     secret = 'n/a'
 
-plugin_name = 'ThreatequationPythonDjango v0.0.3'
-django_server = 'https://api.threatequation.com/'
-library_log_server = 'https://api.threatequation.com/library/'
-system_log_server = 'https://api.threatequation.com/system/'
-verify_url = 'http://api.threatequation.com/verify'
-server = ''
+
+server = 'https://www.threatequation.com'
+
+plugin_name = 'ThreatequationPythonDjango v0.0.5'
+django_server = server + '/api/v1/attack_log/'
+verify_url = server + '/api/v1/product_verify/'
 port = None
