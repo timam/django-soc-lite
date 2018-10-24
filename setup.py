@@ -2,6 +2,9 @@ from __future__ import absolute_import, division, print_function
 
 from setuptools import find_packages, setup
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(
     name="django-soc-lite",
     version="0.0.5",
@@ -12,11 +15,12 @@ setup(
         "requests-cache==0.4.13",
         'shellescape==3.4.1'
     ],
-    long_description=open('README.md').read(),
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     maintainer='threatequation',
-    url = "",
-    author = "",
-    author_email = "",
+    url = "https://github.com/threatequation/django-soc-lite",
+    author = "threatequation",
+    author_email = "contact@threatequation.com",
     packages=find_packages(),
     package_data={'django_soc_lite': ['rules.json',]},
     include_package_data=True,
