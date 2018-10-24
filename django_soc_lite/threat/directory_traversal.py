@@ -12,6 +12,15 @@ class DTMiddleware(object):
         if self.request.method == 'GET':
             self.get_method()
         if self.request.method == 'POST':
+            self.request_data = self.request.POST.copy()
+            self.post_method()
+        
+        if self.request.method == 'PUT':
+            self.request_data = self.request.PUT.copy()
+            self.post_method()
+        
+        if self.request.method == 'PATCH':
+            self.request_data = self.request.PATCH.copy()
             self.post_method()
 
     def get_method(self):
@@ -35,23 +44,16 @@ class DTMiddleware(object):
                 value = url_coder.decoder(str(org_value))                  #decoding/double/decoding
                 if rule_checker.dt_filter(str(value)):                #check attack
                     send_log(self.request, str(org_value))
-                    q = bleach.clean(value)
-                    if not isinstance(q, str):
-                        q = q.encode("utf-8")
- 
-                    q = HTML_Escape.CommandEscape(q)
-                self.request.path_info = os.path.join(os.path.split(path)[0],q)            #update path
                 return True
             except:
                 return False 
     def post_method(self):
-        self.request.POST = self.request.POST.copy()
-        l = [k for k in self.request.POST]
+        l = [k for k in self.request_data]
         if not l:
             return
         for i in range(len(l)):
             par = l[i] 
-            org_value = self.request.POST.get(par)
+            org_value = self.request_data.get(par)
             value = url_coder.decoder(str(org_value))
             if rule_checker.dt_filter(str(value)): 
                 send_log(self.request, str(par+'='+org_value))

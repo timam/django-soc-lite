@@ -11,6 +11,15 @@ class XSSMiddleware(object):
         if self.request.method == 'GET':
             self.get_method()
         if self.request.method == 'POST':
+            self.request_data = self.request.POST.copy()
+            self.post_method()
+        
+        if self.request.method == 'PUT':
+            self.request_data = self.request.PUT.copy()
+            self.post_method()
+        
+        if self.request.method == 'PATCH':
+            self.request_data = self.request.PATCH.copy()
             self.post_method()
 
     def get_method(self):
@@ -38,13 +47,12 @@ class XSSMiddleware(object):
             except:
                 return False  
     def post_method(self):
-        self.request.POST = self.request.POST.copy()
-        l = [k for k in self.request.POST]
+        l = [k for k in self.request_data]
         if not l:
             return
         for i in range(len(l)):
             par = l[i] 
-            org_value = self.request.POST.get(par)
+            org_value = self.request_data.get(par)
             value = url_coder.decoder(str(org_value))
             if rule_checker.xss_filter(str(value)): 
-                send_log(self.request, str(par+'='+org_value), rule_checker.xss_filter(str(value))[1]) 
+                send_log(self.request, str(par+'='+org_value), rule_checker.xss_filter(str(value))[1])
