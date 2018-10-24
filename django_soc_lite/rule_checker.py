@@ -23,7 +23,7 @@ def get_rule():
 def converter(query):
     """method for decoding urls <query>:<str>"""
     try:
-        from .. import url_coder
+        from . import url_coder
     except ImportError:
         import url_coder
     query = url_coder.decoder(str(query))

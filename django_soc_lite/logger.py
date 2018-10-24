@@ -2,7 +2,7 @@
 import json
 import logging
 import requests
-from .. import django_server
+from . import django_server
 #token headers will be added....
 
 class StructuredMessage(object):

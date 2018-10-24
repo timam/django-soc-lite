@@ -23,9 +23,7 @@ class XSSMiddleware(object):
             org_value = dict[parameter]
             value = url_coder.decoder(str(org_value))                    #decoding/double/decoding
             if rule_checker.xss_filter(str(value)):                      #check attack 
-                #print('don')
                 send_log(self.request, query,rule_checker.xss_filter(str(value))[1])
-                
                 return True
             return False
         if not query:
@@ -36,12 +34,6 @@ class XSSMiddleware(object):
                 value = url_coder.decoder(str(org_value))                   #decoding/double/decoding
                 if rule_checker.xss_filter(str(value)):                #check attack
                     send_log(self.request, org_value, rule_checker.xss_filter(str(value))[1])
-                    q = bleach.clean(value)
-                    if not isinstance(q, str):
-                        q = q.encode("utf-8")
- 
-                    q = HTML_Escape.XSSEncode(q)   
-                self.request.path_info = os.path.join(os.path.split(path)[0],q)            #update path
                 return True
             except:
                 return False  
@@ -56,8 +48,3 @@ class XSSMiddleware(object):
             value = url_coder.decoder(str(org_value))
             if rule_checker.xss_filter(str(value)): 
                 send_log(self.request, str(par+'='+org_value), rule_checker.xss_filter(str(value))[1]) 
-                q = bleach.clean(value)
-                if not isinstance(q, str):
-                    q = q.encode("utf-8")
-                q = HTML_Escape.XSSEncode(q)
-                self.request.POST.update({ par: q}) 

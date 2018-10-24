@@ -35,9 +35,6 @@ class SQLMiddleware(object):
             value = url_coder.decoder(str(value))                          #decoding/double/decoding
             if rule_checker.sql_filter(str(value)):                        #check attack 
                 send_log(self.request,query,rule_checker.sql_filter(str(value))[1])
-                q = purifier(value)
-                q = rule_checker.sql_replace(q) 
-                self.request.META['QUERY_STRING']=str(parameter+'='+q)
         return
 
     def post_method(self):
@@ -51,6 +48,3 @@ class SQLMiddleware(object):
             value = url_coder.decoder(str(org_value))
             if rule_checker.sql_filter(str(value)):
                 send_log(self.request, str(par+'='+org_value),rule_checker.sql_filter(str(value))[1]) 
-                value = purifier(value)
-                q = rule_checker.sql_replace(value) 
-                self.request.POST.update({ par: q})

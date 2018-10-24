@@ -25,13 +25,6 @@ class DTMiddleware(object):
             value = url_coder.decoder(str(value))                          #decoding/double/decoding
             if rule_checker.dt_filter(str(value)):                         #check attack 
                 send_log(self.request, query)
-                q = bleach.clean(value)
-                
-                q = HTML_Escape.CommandEscape(q)  
-                if not isinstance(q, str):
-                    q = q.encode("utf-8")
-                
-                self.request.META['QUERY_STRING']=str(parameter+'='+q)
                 return True
             return False
         if not query:
@@ -62,8 +55,3 @@ class DTMiddleware(object):
             value = url_coder.decoder(str(org_value))
             if rule_checker.dt_filter(str(value)): 
                 send_log(self.request, str(par+'='+org_value))
-                q = bleach.clean(value)
-                if not isinstance(q, str):
-                    q = q.encode("utf-8")
-                q = HTML_Escape.CommandEscape(q)
-                self.request.POST.update({ par: q})

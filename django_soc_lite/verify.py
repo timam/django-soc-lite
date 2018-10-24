@@ -2,7 +2,7 @@
 import json
 import requests
 import requests_cache
-from .. import client_id, secret, verify_url
+from . import client_id, secret, verify_url
 
 requests_cache.install_cache('response_cache', expire_after=86400)
 

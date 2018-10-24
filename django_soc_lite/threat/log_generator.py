@@ -36,7 +36,7 @@ def send(request, event, queryString, url, d_method='input validation',descripti
     agent = 'Django'+' : '+django.get_version()
     core = 'Python'+' : '+'{0[0]}.{0[1]}.{0[2]}'.format(sys.version_info)
     version = {'core':core,'agent':agent,'database':db_name}
-    internal_data = {'description':description, 'impact':impact, 'cwe':cwe, 'method':request.method, 'event':event, 'queryString':queryString, 'risk':risk,'url':url, 'stacktrace':stacktrace}
+    internal_data = {'description':description, 'impact':impact, 'cwe':cwe, 'method':request.method, 'event':event, 'queryString':queryString, 'risk':risk,'url':url}
     logging.info(log(name='attack',clientId=client_id, ip=ip, userAgent=userAgent, timestamp=str(datetime.utcnow()),ApplicationName=plugin_name, data=internal_data,backend=version,defence_method=d_method))
     
     
